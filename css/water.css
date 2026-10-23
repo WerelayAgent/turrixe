@@ -1,0 +1,7 @@
+/* water: caustics, marine snow, plankton and ripples on the fixed #water canvas.
+   base.css positions the canvas; this only lets the layer surface softly on the first frame. */
+#water {
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-out);
+}
+#water.is-on { opacity: 1; }

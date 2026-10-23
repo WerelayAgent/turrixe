@@ -1,0 +1,188 @@
+/* vault: the glass jar of fees and the live serif odometers beside it */
+#vault {
+  --vlt-glass: color-mix(in oklab, var(--field) 86%, var(--bg));
+  position: relative;
+}
+.vlt { margin-top: clamp(56px, 8vw, 128px); color: var(--fg); }
+
+/* ---------- head ---------- */
+.vlt__head { max-width: 640px; margin: 0 0 clamp(8px, 2vw, 24px); }
+.vlt__kicker {
+  font-family: var(--mono); font-size: 13px; letter-spacing: .02em;
+  margin: 0 0 12px; opacity: .72;
+  display: flex; align-items: center; gap: 9px;
+}
+.vlt__kicker::before {
+  content: ""; width: 9px; height: 9px; flex: none;
+  background: var(--cream);
+  border-radius: 58% 42% 55% 45% / 52% 60% 40% 48%;
+  animation: vlt-live 2.4s var(--ease-in-out) infinite;
+}
+.vlt__title {
+  font-size: clamp(32px, 3.6vw, 56px); line-height: 1; letter-spacing: -0.032em;
+  font-weight: 540; margin: 0 0 12px;
+  font-variation-settings: "opsz" 96, "SOFT" 100, "WONK" 1;
+}
+.vlt__sub { font-size: clamp(17px, 1.3vw, 21px); margin: 0; opacity: .82; font-style: italic; }
+
+/* ---------- stage ---------- */
+.vlt__stage {
+  display: grid;
+  grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr);
+  gap: clamp(24px, 4.5vw, 80px);
+  align-items: center;
+}
+.vlt__jarwrap { position: relative; }
+.vlt__jar {
+  position: relative;
+  width: 100%; max-width: 430px; margin: 0 auto;
+  aspect-ratio: 472 / 690;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  cursor: pointer;
+}
+.vlt__cv { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vlt__keeper { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-origin: 50% 300%; pointer-events: none; }
+.vlt__keeper .hj-mark { width: 100%; height: 100%; animation-duration: 3.2s; }
+.vlt__tags { position: absolute; inset: 0; pointer-events: none; }
+.vlt__tag {
+  position: absolute; left: 0; top: 0;
+  font: 600 12px/1 var(--mono); letter-spacing: .01em;
+  color: var(--ink);
+  opacity: 0;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+/* what I say when someone taps my glass */
+.vlt__say {
+  position: absolute; right: -4%; top: 2%;
+  max-width: 13em; margin: 0;
+  font-size: 17px; line-height: 1.25; font-style: italic;
+  font-variation-settings: "opsz" 24, "SOFT" 100, "WONK" 1;
+  color: var(--cream);
+  text-align: left;
+  opacity: 0; transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity .6s var(--ease-out), transform .9s var(--ease-sink);
+}
+.vlt__say.is-on { opacity: 1; transform: none; transition: opacity .35s var(--ease-out), transform .8s var(--ease-jelly); }
+
+/* bubble peek: cream mono on a hand-cut ink blot */
+.vlt__peek {
+  position: absolute; left: 0; top: 0; margin: 0;
+  padding: 7px 11px 8px;
+  font: 400 11.5px/1.2 var(--mono); white-space: nowrap;
+  color: var(--cream); background: var(--ink);
+  border-radius: 46% 54% 52% 48% / 62% 48% 52% 40%;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s var(--ease-out);
+}
+.vlt__peek.is-on { opacity: 1; }
+
+/* ---------- ledger ---------- */
+.vlt__ledger {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(26px, 3vw, 44px) clamp(20px, 3vw, 48px);
+  margin: 0;
+}
+.vlt__stat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "glyph label" "value value" "note note" "live live";
+  column-gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+.vlt__stat--fees { grid-column: 1 / -1; }
+.vlt__stat dd, .vlt__stat dt { margin: 0; }
+.vlt__glyph { grid-area: glyph; width: 52px; height: 52px; }
+.vlt__stat--fees .vlt__glyph { width: 62px; height: 62px; }
+.vlt__glyph { rotate: var(--turn, 0deg); }
+.vlt__stat--burned .vlt__glyph { --turn: -4deg; }
+.vlt__stat--holders .vlt__glyph { --turn: 3deg; }
+.vlt__stat--paid .vlt__glyph { --turn: -2deg; }
+.vlt__stat--versions .vlt__glyph { --turn: 4deg; }
+.vlt-glyph { width: 100%; height: 100%; overflow: visible; display: block; transform-origin: 50% 60%; }
+.vlt-glyph__glass, .vlt-glyph__glassfill { fill: var(--vlt-glass); }
+.vlt-glyph__ink { fill: var(--ink); }
+.vlt-glyph__cream { fill: var(--cream); }
+.vlt__label { grid-area: label; font-family: var(--mono); font-size: 13px; letter-spacing: .02em; opacity: .8; }
+.vlt__lunit { opacity: .62; }
+.vlt__value {
+  grid-area: value;
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .32em;
+  margin-top: 6px !important;
+  font-size: clamp(40px, 4.3vw, 66px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-weight: 480;
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 0;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+.vlt__stat--fees .vlt__value { font-size: clamp(64px, 8.6vw, 140px); letter-spacing: -0.035em; column-gap: 14px; }
+.vlt__unit { font: 600 13px/1 var(--mono); letter-spacing: .03em; opacity: .7; transform: translateY(-.1em); }
+.vlt__stat--fees .vlt__unit { font-size: 15px; }
+.vlt__note { grid-area: note; margin-top: 8px !important; font-size: 15.5px; line-height: 1.35; font-style: italic; opacity: .74; max-width: 28em; }
+.vlt__live {
+  grid-area: live; margin-top: 12px !important;
+  display: flex; align-items: center; gap: 9px;
+  font: 400 12.5px/1.3 var(--mono); opacity: .9;
+}
+.vlt__live b { font-weight: 600; }
+.vlt__livedot {
+  width: 8px; height: 8px; flex: none; background: var(--cream);
+  border-radius: 55% 45% 60% 40% / 45% 55% 45% 55%;
+  animation: vlt-live 1.8s var(--ease-in-out) infinite;
+}
+
+/* ---------- odometer ---------- */
+.vo { display: inline-flex; align-items: flex-start; }
+.vo-d {
+  position: relative; display: inline-block;
+  height: 1.12em; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 15%, #000 85%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 15%, #000 85%, transparent 100%);
+}
+.vo-reel { display: block; will-change: transform; }
+.vo-reel i { display: block; height: 1.12em; line-height: 1.12em; font-style: normal; text-align: center; transform: scaleY(var(--st, 1)); transform-origin: 50% 50%; }
+.vo-s { display: inline-block; height: 1.12em; line-height: 1.12em; }
+.vo-dot { margin: 0 -.04em; }
+.vlt.is-live .vo-d { animation: vlt-float 5.6s var(--ease-in-out) infinite; animation-delay: calc(var(--i, 0) * -.43s); }
+
+/* a number that just moved takes a breath in (weight swells, then settles) */
+.vlt__stat.is-bump .vlt__value { animation: vlt-bump 1.2s var(--ease-out); }
+.vlt__stat.is-bump .vlt-glyph { animation: vlt-glyph-bump .95s var(--ease-jelly); }
+
+@keyframes vlt-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-.035em); } }
+@keyframes vlt-bump {
+  0% { font-weight: 480; }
+  22% { font-weight: 660; }
+  100% { font-weight: 480; }
+}
+@keyframes vlt-glyph-bump { 0% { transform: scale(1); } 28% { transform: scale(1.2, .88); } 100% { transform: scale(1); } }
+@keyframes vlt-live { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.62); opacity: .55; } }
+
+/* ---------- small screens ---------- */
+@media (max-width: 900px) {
+  .vlt__stage { grid-template-columns: 1fr; gap: 28px; }
+  .vlt__jar { max-width: 320px; }
+  .vlt__say { right: auto; left: 64%; top: 0; font-size: 15px; max-width: 9em; }
+}
+@media (max-width: 560px) {
+  .vlt__ledger { grid-template-columns: 1fr; gap: 26px; }
+  .vlt__stat { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: "glyph label" "glyph value" "glyph note" "glyph live"; align-items: start; column-gap: 14px; }
+  .vlt__stat--fees { grid-template-columns: 52px minmax(0, 1fr); }
+  .vlt__glyph, .vlt__stat--fees .vlt__glyph { width: 44px; height: 44px; margin-top: 2px; }
+  .vlt__stat--fees .vlt__glyph { width: 52px; height: 52px; }
+  .vlt__value { font-size: clamp(36px, 10.5vw, 46px); }
+  .vlt__stat--fees .vlt__value { font-size: clamp(56px, 17vw, 76px); }
+  .vlt__note { font-size: 14.5px; }
+}
+
+/* reduced motion: final states, no loops */
+.vlt.is-reduced .vo-d, .vlt.is-reduced .vlt__livedot, .vlt.is-reduced .vlt__kicker::before { animation: none; }
+.vlt.is-reduced .vlt__stat.is-bump .vlt__value, .vlt.is-reduced .vlt__stat.is-bump .vlt-glyph { animation: none; }

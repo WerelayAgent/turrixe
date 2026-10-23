@@ -1,0 +1,228 @@
+/* depth: the water colour, the light from the surface, and the sounding-line gauge on the right edge */
+
+/* the water lives on its own fixed layer so a colour change never repaints the page */
+html.depth-live body { background: transparent; }
+#depth { position: static; }
+.depth__water {
+  position: fixed; inset: 0; z-index: -1;
+  background: var(--bg);
+  pointer-events: none;
+  will-change: transform;
+}
+.depth__shafts {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  z-index: 0; /* after #water in the DOM, under #crowd */
+  pointer-events: none;
+}
+
+/* ---------- the gauge ---------- */
+.depth__gauge {
+  --edge: 28px;
+  --diver: 21px;
+  position: fixed; top: 0; right: 0; height: 100vh; width: 200px;
+  z-index: var(--z-depth);
+  pointer-events: none;
+  color: var(--fg);
+  opacity: 0;
+  transition: opacity .9s var(--ease-out), color .75s var(--ease-out);
+}
+.depth__gauge.is-in { opacity: 1; }
+.depth__ink { position: absolute; top: 0; right: 0; pointer-events: none; }
+.depth__nav { position: absolute; inset: 0; pointer-events: none; }
+
+/* section names: italic like water names on a chart */
+.depth__label {
+  --base: 0;
+  --near: 1;
+  position: absolute; top: 0; right: calc(var(--edge) + 17px);
+  display: flex; align-items: baseline; gap: 7px; flex-direction: row-reverse;
+  margin-top: -0.72em;
+  font: italic 400 13px/1.3 var(--serif);
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 0, "wght" 400;
+  letter-spacing: 0.005em;
+  color: inherit; text-decoration: none; white-space: nowrap;
+  opacity: calc(var(--base) * var(--near));
+  pointer-events: none;
+  transition: opacity .55s var(--ease-out), font-variation-settings .7s var(--ease-jelly), translate .7s var(--ease-jelly);
+}
+.depth__m {
+  font: 400 10.5px/1 var(--mono); letter-spacing: 0;
+  opacity: 0; translate: 6px 0;
+  transition: opacity .4s var(--ease-out), translate .6s var(--ease-jelly);
+}
+.has-room .depth__label { --base: .5; pointer-events: auto; }
+.depth__label.is-here {
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 1, "wght" 620;
+  animation: depth-breathe 3.2s var(--ease-in-out) infinite alternate;
+}
+.has-room .depth__label.is-here { --base: 1; }
+.is-open .depth__label { --base: .82; pointer-events: auto; }
+.is-open .depth__label.is-here { --base: 1; }
+.depth__label:hover, .depth__label:focus-visible {
+  --base: 1;
+  translate: -4px 0;
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 1, "wght" 680;
+  outline: none;
+}
+.depth__label:focus-visible .depth__name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.is-hover .depth__m, .is-open .depth__m, .depth__label:hover .depth__m { opacity: .7; translate: 0 0; }
+
+@keyframes depth-breathe {
+  from { font-variation-settings: "opsz" 14, "SOFT" 40, "WONK" 1, "wght" 560; }
+  to   { font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 1, "wght" 660; }
+}
+
+/* entrance: the names surface one by one after the line is cast */
+.depth__gauge.is-intro .depth__label { animation: depth-label-in 1s var(--ease-out) backwards; animation-delay: calc(500ms + var(--i) * 120ms); }
+.depth__gauge.is-intro .depth__label.is-here { animation: depth-label-in 1s var(--ease-out) backwards, depth-breathe 3.2s var(--ease-in-out) 1.6s infinite alternate; animation-delay: calc(500ms + var(--i) * 120ms), 1.6s; }
+@keyframes depth-label-in {
+  from { opacity: 0; translate: 10px 0; }
+}
+
+/* ---------- the readout: an odometer that rolls as you sink ---------- */
+/* no zero padding: js opens a column (width, opacity, visibility) only while it carries a digit */
+.depth__readout {
+  position: absolute; top: 0; right: var(--ro, calc(var(--edge) + var(--diver) + 9px));
+  display: flex; flex-direction: column; align-items: flex-end;
+  margin-top: -0.66em;
+  font: 600 13px/1 var(--mono);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  will-change: transform;
+  transition: opacity .6s var(--ease-out);
+}
+.depth__num { display: flex; align-items: center; }
+.depth__num > span { display: inline-block; height: 1.25em; line-height: 1.25em; }
+.depth__sign, .depth__comma { overflow: hidden; width: 1ch; text-align: center; }
+.depth__here {
+  position: relative; display: block; height: 1.3em; min-width: 6em; margin-top: 1px;
+  font: italic 400 12.5px/1.3 var(--serif);
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 1, "wght" 430;
+  letter-spacing: 0.01em;
+}
+.depth__here > span { position: absolute; right: 0; top: 0; white-space: nowrap; opacity: 0; }
+.depth__col { position: relative; width: 1ch; overflow: hidden; }
+.depth__reel { display: block; will-change: transform; }
+.depth__reel i { display: block; height: 1.25em; line-height: 1.25em; font-style: normal; text-align: center; }
+.depth__unit { margin-left: 0.4em; font-weight: 400; opacity: .75; }
+
+/* ---------- the probe: hover the line to read any depth, click to dive there ---------- */
+.depth__probe {
+  position: absolute; top: 0; right: calc(var(--edge) + 34px);
+  display: flex; align-items: baseline; gap: 8px; flex-direction: row-reverse;
+  margin-top: -0.7em;
+  font: 600 12px/1.3 var(--mono);
+  white-space: nowrap;
+  opacity: 0; translate: 6px 0;
+  pointer-events: none;
+  transition: opacity .3s var(--ease-out), translate .5s var(--ease-jelly);
+}
+.depth__probe-name { font: italic 400 13px/1.3 var(--serif); font-variation-settings: "SOFT" 100, "WONK" 1; }
+.is-hover .depth__probe { opacity: 1; translate: 0 0; }
+.is-hover .depth__readout { opacity: .35; }
+
+.depth__hit {
+  position: absolute; right: 0; top: 70px; height: 80vh;
+  width: calc(var(--edge) + 24px);
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* no room beside the page: the readout surfaces only while you move or touch the line */
+.depth__gauge:not(.has-room) .depth__readout { opacity: 0; }
+.depth__gauge:not(.has-room).is-moving .depth__readout { opacity: 1; }
+
+/* ---------- phones: no line over the words. A compact readout in the top bar, a chart on tap ---------- */
+/* js switches with the top bar's own breakpoint (max-width: 720px), where its section links fold away */
+.depth__mini, .depth__chart { display: none; }
+#depth.is-compact .depth__gauge { display: none; }
+#depth.is-compact .depth__mini, #depth.is-compact .depth__chart { display: block; }
+
+/* the readout sits in the empty middle of the top bar, above it: nothing ever scrolls under it */
+.depth__mini {
+  position: fixed; top: 0; left: 0; height: 63px;
+  z-index: calc(var(--z-top) + 1);
+  color: var(--fg);
+  opacity: 0;
+  transition: opacity .9s var(--ease-out), color .75s var(--ease-out);
+}
+.depth__mini.is-in { opacity: 1; }
+.depth__mini-btn {
+  position: relative;
+  display: flex; align-items: flex-start; justify-content: flex-end;
+  width: 98px; height: 100%;
+  /* top: js centres the 33px block on a whole pixel, so the rolling reels and the fixed digits share a baseline;
+     right 28px: the plumb line's lane (right 6px + 18px wide + 4px air) */
+  margin: 0; padding: var(--rt, 15px) 28px 0 6px;
+  border: 0; background: none; color: inherit; font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.depth__mini.is-tight .depth__mini-btn { width: 74px; padding-right: 6px; }
+.depth__mini.is-tight .depth__mini-line { display: none; }
+.depth__mini-btn:focus { outline: none; }
+.depth__mini-btn:focus-visible { outline: 1.5px dashed currentColor; outline-offset: -5px; }
+.depth__mini-read {
+  display: flex; flex-direction: column; align-items: flex-end;
+  font: 600 12px/1 var(--mono);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: translate .5s var(--ease-jelly);
+}
+.depth__mini-btn:active .depth__mini-read { translate: 0 1px; }
+.depth__mini .depth__here { min-width: 0; height: 16px; margin-top: 2px; font-size: 12.5px; line-height: 16px; }
+.depth__mini .depth__num > span { height: 15px; line-height: 15px; }
+.depth__mini-line { position: absolute; top: 0; right: 6px; width: 18px; height: 100%; pointer-events: none; }
+
+/* the chart: the surface water lowers from under the top bar with the line cast down it, a knot per section */
+.depth__chart {
+  position: fixed; top: 0; left: 0; right: 0; height: 420px;
+  z-index: calc(var(--z-top) - 1);
+  background: var(--bg);
+  color: var(--fg);
+  transform: translate3d(0, -100%, 0);
+  visibility: hidden;
+  transition: transform .45s var(--ease-sink), visibility 0s linear .45s, background-color .6s var(--ease-out), color .75s var(--ease-out);
+  /* the same soft waterline as the top bar's, at the bottom edge */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), 95% calc(100% - 4px), 89% calc(100% - 10px), 82% calc(100% - 3px), 75% calc(100% - 8px), 67% calc(100% - 2px), 59% calc(100% - 7px), 51% calc(100% - 3px), 43% calc(100% - 9px), 35% calc(100% - 3px), 27% calc(100% - 8px), 19% calc(100% - 1px), 11% calc(100% - 7px), 5% calc(100% - 3px), 0 calc(100% - 8px));
+}
+.depth__chart.is-open {
+  transform: none;
+  visibility: visible;
+  transition: transform .75s var(--ease-jelly), visibility 0s, background-color .6s var(--ease-out), color .75s var(--ease-out);
+}
+.depth__chart-ink { position: absolute; top: 0; left: 0; overflow: visible; fill: currentColor; pointer-events: none; }
+.depth__chart-knot { fill: currentColor; transition: fill .4s var(--ease-out); }
+.depth__chart-knot.is-here { fill: var(--cream); stroke: var(--ink); stroke-width: .9px; }
+.depth__chart-list { position: absolute; left: 0; right: 0; top: var(--top, 81px); margin: 0; padding: 0; list-style: none; }
+.depth__chart-row {
+  display: flex; align-items: baseline; justify-content: flex-end; gap: 10px;
+  height: 42px;
+  padding-right: calc(100% - var(--lx, 50%) + 16px);   /* the words end just left of the line */
+  color: inherit; text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.depth__chart-row > span { line-height: 42px; white-space: nowrap; }
+.depth__chart-name {
+  font: italic 400 19px/42px var(--serif);
+  font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 0, "wght" 420;
+  transition: font-variation-settings .6s var(--ease-jelly), translate .6s var(--ease-jelly);
+}
+.depth__chart-m { font: 400 11.5px/42px var(--mono); opacity: .66; }
+.depth__chart-row.is-here .depth__chart-name { font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 1, "wght" 640; }
+.depth__chart-row:active .depth__chart-name, .depth__chart-row:focus-visible .depth__chart-name { translate: -4px 0; font-variation-settings: "opsz" 14, "SOFT" 100, "WONK" 1, "wght" 680; }
+.depth__chart-row:focus { outline: none; }
+.depth__chart-row:focus-visible .depth__chart-name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+/* ---------- the ink -> cream flip ---------- */
+/* depth writes --fg once per crossing (about 920 m, between thinking and tentacles); body fades its colour
+   (base.css), and so do the blocks that read var(--fg) directly and can be on screen at that moment.
+   Blocks further down (.jr, .vlt) are off screen when it happens: a fade there would only cost style work.
+   :where() keeps this at zero specificity, so a module's own transition list always wins. */
+:where(.th, .egg) { transition: color .75s var(--ease-out); }
+
+@media (prefers-reduced-motion: reduce) {
+  .depth__label, .depth__label.is-here, .depth__gauge.is-intro .depth__label, .depth__gauge.is-intro .depth__label.is-here { animation: none; }
+}

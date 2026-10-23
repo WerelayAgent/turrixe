@@ -1,0 +1,2 @@
+/* crowd: the fixed canvas of brainless jellies. Position and size come from base.css; everything is drawn in js. */
+#crowd { contain: strict; }

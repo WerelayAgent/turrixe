@@ -1,0 +1,115 @@
+/* Base layout shared by all sections. Module styles live in their own files. */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--serif);
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 60, "WONK" 0;
+  font-size: clamp(17px, 1.15vw, 20px);
+  line-height: 1.45;
+  overflow-x: hidden;
+  transition: color .6s var(--ease-out);
+}
+::selection { background: var(--ink); color: var(--cream); }
+a { color: inherit; }
+img, svg, canvas { display: block; }
+
+#water, #crowd { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; }
+#water { z-index: var(--z-water); }
+#crowd { z-index: var(--z-crowd); }
+main { position: relative; z-index: var(--z-main); }
+
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-top);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px var(--gutter);
+  pointer-events: none;
+  background: var(--bg);           /* the surface of the water: content dives under it, never prints through it */
+  transition: background-color .6s var(--ease-out);
+}
+/* a soft waterline under the bar instead of a hard edge */
+.topbar::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 14px;
+  background: inherit; pointer-events: none;
+  clip-path: polygon(0 0, 100% 0, 100% 38%, 96% 62%, 91% 40%, 85% 70%, 79% 44%, 72% 66%, 65% 38%, 58% 64%, 51% 42%, 44% 70%, 37% 40%, 30% 62%, 23% 36%, 16% 66%, 9% 42%, 4% 60%, 0 38%);
+}
+.topbar > * { pointer-events: auto; }
+.topbar__name { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; text-transform: lowercase; text-decoration: none; }
+.topbar__mark { text-decoration: none; }
+.topbar__nav { display: flex; gap: 22px; font-size: 16px; }
+.topbar__nav a { text-decoration: none; opacity: .8; }
+.topbar__nav a:hover { opacity: 1; }
+.topbar__tools { display: flex; align-items: center; gap: 12px; }
+.topbar__buy { font-family: var(--mono); font-size: 13px; text-decoration: none; padding: 8px 14px; border-radius: var(--radius); background: var(--ink); color: var(--cream); }
+@media (max-width: 720px) { .topbar__nav { display: none; } }
+
+.sec {
+  position: relative;
+  min-height: 100vh;
+  padding: 120px var(--gutter) 80px;
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+.sec__head { max-width: 760px; margin-bottom: 48px; }
+.sec__head h2 {
+  font-size: clamp(40px, 6vw, 92px);
+  line-height: .98;
+  letter-spacing: -0.035em;
+  font-weight: 560;
+  margin: 0 0 18px;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+.sec__head p { font-size: clamp(18px, 1.5vw, 24px); margin: 0; max-width: 620px; opacity: .9; }
+
+.sec--surface {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 24px;
+  padding-top: 90px;
+}
+@media (max-width: 900px) { .sec--surface { grid-template-columns: 1fr; } }
+.hero-jelly { position: relative; aspect-ratio: 1 / 1.1; width: 100%; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 14px; letter-spacing: .02em;
+  text-decoration: none; padding: 12px 18px; border-radius: var(--radius);
+  transition: transform .4s var(--ease-jelly), background .3s, color .3s;
+}
+.btn:hover { transform: translateY(-2px) scale(1.03); }
+.btn--ink { background: var(--ink); color: var(--cream); }
+.btn--line { border: 2px solid currentColor; }
+
+.sec--abyss { display: flex; align-items: flex-end; }
+.abyss { width: 100%; }
+.abyss__line { font-size: clamp(54px, 10vw, 160px); line-height: .9; letter-spacing: -0.045em; margin: 0 0 40px; font-weight: 600; }
+.abyss__foot { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; padding-top: 40px; }
+.abyss__links { display: flex; gap: 22px; font-family: var(--mono); font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* opt-in hand-drawn shiver (js/core/boil.js) */
+.boil { filter: url(#ink-boil); }
+
+/* the water covers the page from the very first paint, before any script runs;
+   it lifts on its own once boot says the loader is done (body.is-loaded), even if the loader module failed */
+body:not(.is-loaded) #loader:empty { position: fixed; inset: 0; z-index: var(--z-loader); background: var(--field); }
+
+/* sections far off screen pause their CSS loops: main.js toggles .is-off and writes the pause rule for exactly the
+   elements that have CSS animations (a universal ".sec.is-off *" restyled every element of a section on each toggle) */
+
+/* the thinking section: brain plate and thought stream side by side */
+.thinking { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 72px); align-items: center; }
+@media (max-width: 900px) { .thinking { grid-template-columns: 1fr; } }
+
+/* the Live link: one of my eyes, blinking (live-window.css draws it) */
+.topbar__live { display: inline-flex; align-items: center; gap: 6px; }
+.topbar__eye { width: 13px; height: 13px; overflow: visible; }
+.topbar__eye .lw__white { stroke: var(--ink); stroke-width: 1.4; }

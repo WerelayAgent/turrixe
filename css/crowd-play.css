@@ -1,0 +1,79 @@
+/* crowd-play: Turri's aquarium (brief 14 + attention threads) */
+#crowd-play { position: relative; }
+.cp-tank {
+  position: relative;
+  height: clamp(460px, 66vh, 680px);
+  margin: 0 -6px;
+}
+.cp-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  touch-action: pan-y;
+  outline: none;
+}
+.cp-canvas:focus-visible { outline: 2px dashed var(--cream); outline-offset: 6px; }
+.cp-says { position: absolute; inset: 0; pointer-events: none; }
+
+/* speech: an inked blob around the words, cream for the brainless, ink for Turri */
+.cp-say { position: absolute; left: 0; top: 0; will-change: transform; }
+.cp-say__pop {
+  position: relative;
+  transform-origin: var(--ox, 50%) var(--oy, 100%);
+  animation: cp-pop .66s var(--ease-jelly) both;
+}
+.cp-say__shape { position: absolute; overflow: visible; pointer-events: none; }
+.cp-say__body {
+  position: relative; display: block;
+  width: max-content; max-width: 232px;
+  padding: 11px 16px 12px;
+  font-family: var(--serif);
+  font-style: italic; font-weight: 420;
+  font-size: 17px; line-height: 1.24;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 24;
+  color: var(--ink);
+}
+.cp-say--ink .cp-say__body { color: var(--cream); max-width: 262px; }
+.cp-say__head, .cp-say__meta {
+  display: block;
+  font-family: var(--mono); font-style: normal; font-weight: 500;
+  font-size: 10.5px; letter-spacing: .01em; line-height: 1.3;
+}
+.cp-say__head { margin-bottom: 5px; opacity: .72; }
+.cp-say__meta { margin-top: 7px; opacity: .55; font-weight: 400; }
+.cp-say.is-out .cp-say__pop { animation: cp-sink .8s var(--ease-sink) forwards; }
+.cp-w {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(5px);
+  transform: translateY(3px);
+  animation: cp-word .62s var(--ease-out) forwards;
+  animation-delay: var(--d, 0s);
+}
+@keyframes cp-pop { from { transform: scale(.5) rotate(-3deg); opacity: 0; } 60% { opacity: 1; } to { transform: none; opacity: 1; } }
+@keyframes cp-sink { to { transform: translateY(28px) scale(.9); opacity: 0; filter: blur(3px); } }
+@keyframes cp-word { to { opacity: 1; filter: blur(0); transform: none; } }
+
+.cp-foot {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 10px 28px; flex-wrap: wrap;
+  margin-top: 16px; padding: 0 4px;
+}
+.cp-foot__note {
+  margin: 0; max-width: 620px;
+  font-style: italic;
+  font-size: clamp(15px, 1.1vw, 18px);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  opacity: .86;
+}
+.cp-foot__count { margin: 0; font-family: var(--mono); font-size: 12px; opacity: .7; white-space: nowrap; }
+
+@media (max-width: 720px) {
+  .cp-tank { height: clamp(440px, 64vh, 540px); margin: 0 18px 0 -4px; } /* room for the depth gauge */
+  .cp-foot { padding-right: 22px; }
+  .cp-say__body { font-size: 15.5px; max-width: 200px; padding: 10px 14px 11px; }
+  .cp-say--ink .cp-say__body { max-width: 214px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-say__pop, .cp-w { animation: none; opacity: 1; filter: none; transform: none; }
+}

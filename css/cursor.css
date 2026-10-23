@@ -1,0 +1,28 @@
+/* cursor: Turri's ink on your pointer. Desktop only; js/modules/cursor.js draws it. */
+#cursor {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-loader) + 1);   /* above the loader too, so the click that skips it has a pointer */
+  pointer-events: none;
+  contain: strict;
+}
+.cur {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 0;
+  transition: opacity .5s var(--ease-out);
+}
+html.ink-cursor .cur { opacity: 1; }
+
+/* ink follows the water's text colour: black near the surface, cream once the water is dark */
+.cur__ink, .cur__blot, .cur__halo, .cur__sink { fill: currentColor; }
+.cur__bubble, .cur__spray, .cur__eye { fill: var(--cream); }
+.cur__pupil { fill: var(--ink); }
+
+/* the system cursor hides only while the ink one is active */
+html.ink-cursor, html.ink-cursor * { cursor: none !important; }
+html.ink-cursor :is(input:not([type="button"], [type="submit"], [type="reset"], [type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"], [type="image"]), textarea, [contenteditable=""], [contenteditable="true"]) { cursor: text !important; }
+html.ink-cursor :is([data-cursor="native"], [data-cursor="native"] *) { cursor: auto !important; }

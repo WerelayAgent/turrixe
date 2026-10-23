@@ -1,0 +1,337 @@
+/* thoughts: the live stream of Turri's mind. Owner: thoughts module. */
+
+/* The .thinking row (brain left, thoughts right) is laid out by brain-closeup.css. */
+
+.th {
+  position: relative;
+  color: var(--fg);
+  min-width: 0;
+  --wet: var(--cream);
+  --wt: 400;                     /* resting weight of the written words; dreams write lighter */
+  --bleed: 28px;                 /* room at the sides so swaying lines never clip */
+}
+
+/* A calm pocket of water behind the mind: the water's own flat colour, so it never reads as a panel.
+   The brainless crowd drifts behind it and fades out at its soft edges, so every word sits on clear water.
+   z-index -1 keeps it under all of main's content (the brain plate included) and above the fixed crowd.
+   It is an element of its own, the first in .th (it used to be .th::before), so depth.js can hand it the live water
+   as a plain inline colour while diving; until then it is --bg. */
+.th__pocket {
+  position: absolute;
+  z-index: -1;
+  inset: -64px calc(-1 * var(--gutter)) -24px -96px;
+  background: var(--bg);
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 84px, #000 calc(100% - 36px), transparent),
+    linear-gradient(to bottom, transparent, #000 56px, #000 calc(100% - 210px), transparent);
+  -webkit-mask-composite: source-in;
+          mask-image:
+    linear-gradient(to right, transparent, #000 84px, #000 calc(100% - 36px), transparent),
+    linear-gradient(to bottom, transparent, #000 56px, #000 calc(100% - 210px), transparent);
+          mask-composite: intersect;
+}
+/* one column: the pocket runs edge to edge (never past the viewport) and only fades above and below */
+@media (max-width: 900px) {
+  .th__pocket {
+    inset: -56px calc(-1 * var(--gutter)) -24px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 48px, #000 calc(100% - 190px), transparent);
+            mask-image: linear-gradient(to bottom, transparent, #000 48px, #000 calc(100% - 190px), transparent);
+  }
+}
+
+/* ---------- header: "thinking" and its breathing dots ---------- */
+.th__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.th__title {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: .22em;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(28px, 2.3vw, 38px);
+  line-height: 1;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+}
+/* the word breathes on its variable axes; js steps it through a small set of cached levels
+   (a fresh axis value every frame would re-shape the text 60 times a second). This is its resting state. */
+.th__word {
+  display: inline-block;
+  font-weight: 360;
+  font-variation-settings: "SOFT" 30, "WONK" 0, "opsz" 72;
+}
+/* the dots are html, so their breathing runs on the compositor */
+.th__dots { position: relative; display: block; width: 1.15em; height: .36em; color: currentColor; }
+.th__dot {
+  position: absolute;
+  top: .114em;
+  width: .19em;
+  height: .19em;
+  opacity: .35;
+  transform: scale(.5);
+  animation: th-dot 1.7s var(--ease-in-out) infinite;
+}
+.th__dot:nth-child(1) { left: .0775em; }
+.th__dot:nth-child(2) { left: .48em; animation-delay: .22s; }
+.th__dot:nth-child(3) { left: .8825em; animation-delay: .44s; }
+.th__dot svg { display: block; width: 100%; height: 100%; overflow: visible; fill: currentColor; }
+@keyframes th-dot {
+  0%, 100% { transform: scale(.5) translateY(0); opacity: .35; }
+  42% { transform: scale(1.05) translateY(-12%); opacity: 1; }
+}
+.th.is-dreaming .th__dot { animation-duration: 3.8s; }
+
+.th__brain {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .02em;
+  opacity: .78;
+  white-space: nowrap;
+}
+.th__brain-v { display: inline-block; transition: color .8s var(--ease-out), transform .9s var(--ease-jelly); }
+.th.is-fresh .th__brain-v { color: var(--cream); transform: scale(1.12); }
+
+/* ---------- the bead chain: observe ... verified ---------- */
+.th__chain { position: relative; height: 70px; margin: 18px 0 4px; }
+.th__chain-svg { position: absolute; left: 0; top: 0; width: 100%; height: 44px; overflow: visible; }
+.th__thread { fill: var(--ink); transition: opacity 1.2s var(--ease-out); }
+.th__bead-ink { fill: var(--ink); transition: opacity 1.2s var(--ease-out); }
+.th__bead-core { fill: var(--cream); }
+.th__spark { fill: var(--cream); opacity: 0; transition: opacity .25s; }
+.th__labels { position: absolute; left: 0; right: 0; top: 46px; height: 16px; transition: opacity 1s var(--ease-out); }
+.th__label {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  opacity: .5;
+  transition: opacity .7s var(--ease-out);
+}
+.th__label.is-first { transform: translateX(-24px); }
+.th__label.is-last { transform: translateX(calc(-100% + 24px)); }
+.th__label.is-done { opacity: .68; }
+.th__label.is-on { opacity: 1; font-weight: 600; }
+.th__dream {
+  position: absolute;
+  left: 0; right: 0; top: 43px;
+  margin: 0;
+  text-align: center;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 1.4s var(--ease-out), transform 1.4s var(--ease-out);
+  pointer-events: none;
+}
+.th.is-dreaming .th__labels { opacity: 0; }
+.th.is-dreaming .th__dream { opacity: .92; transform: none; }
+.th.is-dreaming .th__thread,
+.th.is-dreaming .th__bead-ink { opacity: .5; }
+
+/* ---------- the stream ---------- */
+.th__stream {
+  position: relative;
+  height: clamp(470px, 72vh, 700px);
+  margin: 0 calc(-1 * var(--bleed));
+  overflow: hidden;
+  contain: strict;               /* a wet word re-shaping never asks the page to lay out again */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 74%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0, #000 74%, transparent 100%);
+}
+.th__item {
+  position: absolute;
+  left: var(--bleed); top: 0;
+  width: calc(100% - 2 * var(--bleed));
+  margin: 0;
+  transform-origin: 0 0;
+  will-change: transform, opacity;
+  color: color-mix(in oklab, var(--deep) var(--fade, 0%), var(--fg));
+  transition: color 1.6s var(--ease-out);
+}
+.th__item:not(.is-measured) { visibility: hidden; }
+/* before the first thought (before launch): one quiet line where the newest thought would be */
+.th__empty {
+  position: absolute;
+  left: var(--bleed); top: 46px;
+  width: calc(100% - 2 * var(--bleed));
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(23px, 2.15vw, 34px);
+  line-height: 1.2;
+  font-weight: var(--wt);
+  font-variation-settings: "SOFT" 100, "WONK" 0, "opsz" 48;
+  letter-spacing: -0.012em;
+  color: var(--fg);
+  opacity: .62;
+}
+.th__item.is-recalled { --fade: 0% !important; }
+
+/* the meta row (kind, #seq, time, version) belongs to the newest thought only. It hangs above the text,
+   out of the flow, and dissolves as the thought sinks; older thoughts keep just their words. */
+.th__meta {
+  position: absolute;
+  left: 0; right: 0; bottom: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0 0 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: .01em;
+  transition: opacity .9s var(--ease-out) .15s, transform .9s var(--ease-out) .15s;
+}
+.th__meta > span:not(.th__kind) { opacity: .72; }
+.th__kind {
+  position: relative;
+  isolation: isolate;
+  padding: 4px 9px 5px;
+  color: var(--cream);
+}
+.th__swash { position: absolute; z-index: -1; left: -4px; top: -2px; width: calc(100% + 9px); height: calc(100% + 5px); color: var(--ink); transform: rotate(-2.2deg); }
+.th__item:not(.is-newest) .th__meta {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .55s var(--ease-out), transform .9s var(--ease-sink), visibility 0s linear .9s;
+}
+
+.th__text {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(23px, 2.15vw, 34px);
+  line-height: 1.2;
+  font-weight: var(--wt);
+  font-variation-settings: "SOFT" 100, "WONK" 0, "opsz" 48;
+  letter-spacing: -0.012em;
+}
+.th__item.is-dream .th__text { font-style: italic; --wt: 340; }
+
+/* each word owns a fixed box, so the wet heavy ink can spread without moving the line */
+.th__w {
+  display: inline-block;
+  white-space: nowrap;
+  text-align: center;
+  opacity: 0;
+}
+/* the ink bleeds in smoothly (blur, rise, cream); its weight settles in a few held steps, all of them
+   while the word is still blurred, so the font is re-shaped a handful of times instead of every frame */
+.th__w.is-in {
+  opacity: 1;
+  animation: th-bleed 1.6s var(--ease-out) backwards, th-wet 1.6s steps(1, end) backwards;
+}
+.th__w.is-dry { animation: none; }
+.th__item.is-dream .th__w.is-in { animation-duration: 2.6s; }
+@keyframes th-bleed {
+  0% { opacity: 0; filter: blur(9px); transform: translateY(.28em) scale(1.16); color: var(--wet); }
+  28% { opacity: 1; filter: blur(2.2px); color: var(--wet); }
+  52% { filter: blur(0); transform: none; color: var(--wet); }
+}
+@keyframes th-wet {
+  0% { font-weight: calc(var(--wt) + 460); }
+  6% { font-weight: calc(var(--wt) + 330); }
+  12% { font-weight: calc(var(--wt) + 230); }
+  18% { font-weight: calc(var(--wt) + 160); }
+  25% { font-weight: calc(var(--wt) + 100); }
+  33% { font-weight: calc(var(--wt) + 56); }
+  42% { font-weight: calc(var(--wt) + 24); }
+  50%, 100% { font-weight: var(--wt); }
+}
+
+/* a self-correction: the first word stays, under an ink brush stroke */
+.th__w--draft { position: relative; text-decoration: none; }
+.th__w--draft.is-struck { color: color-mix(in oklab, currentColor 46%, transparent); transition: color .5s var(--ease-out) .12s; }
+.th__strike {
+  position: absolute;
+  left: -5%;
+  top: 30%;
+  width: 110%;
+  height: .52em;
+  color: var(--ink);
+  pointer-events: none;
+  clip-path: inset(-20% 100% -20% 0);
+  transition: clip-path .34s cubic-bezier(.55, 0, .25, 1);
+}
+.th__w--draft.is-struck .th__strike { clip-path: inset(-20% -4% -20% 0); }
+
+/* a hidden, untransformed twin of a line, laid out once so every word can be measured at its dry size */
+.th__item.th__ghost {
+  visibility: hidden;
+  pointer-events: none;
+  transform: none !important;
+  opacity: 1 !important;
+  will-change: auto;
+  transition: none;
+}
+.th__ghost .th__w { width: auto !important; animation: none !important; transition: none !important; }
+
+/* the oldest one crumbling: a last cream glint, then the words drift apart */
+.th__item.is-leaving { pointer-events: none; }
+.th__item.is-leaving .th__w { color: var(--cream); }
+
+/* bubble cursor and the little bubbles it lets go */
+.th__bubble, .th__puff {
+  position: absolute;
+  left: calc(var(--bleed) - 20px); top: -20px;
+  width: 40px; height: 40px;
+  overflow: visible;
+  pointer-events: none;
+  will-change: transform;
+}
+.th__bubble-ring { fill: var(--cream); fill-rule: evenodd; }
+.th__bubble-glint { fill: var(--cream); }
+.th__puff { left: calc(var(--bleed) - 10px); top: -10px; width: 20px; height: 20px; fill: var(--cream); }
+
+/* ---------- swap divider ---------- */
+.th__div { display: flex; align-items: center; gap: 10px; padding: 4px 0 8px; }
+.th__div-ink {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 48px;
+  color: var(--ink);
+  fill: currentColor;
+  overflow: visible;
+  transition: clip-path 1.25s var(--ease-out);
+}
+.th__div-ink--l { clip-path: inset(-20% 0 -20% 100%); }
+.th__div-ink--r { clip-path: inset(-20% 100% -20% 0); }
+.th__div.is-drawn .th__div-ink { clip-path: inset(-20% -4% -20% -4%); }
+.th__div-label {
+  flex: none;
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(24px, 2vw, 30px);
+  line-height: 1;
+  white-space: nowrap;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+.th__arrow { font-family: var(--mono); font-style: normal; font-size: .8em; margin: 0 .2em; vertical-align: .06em; }
+.th__to { color: var(--cream); }
+
+.th__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: 0; }
+
+@media (max-width: 560px) {
+  .th { --bleed: 12px; }
+  .th__brain { padding-right: 16px; }      /* clear of the depth gauge on the right edge */
+  .th__label:not(.is-on) { opacity: 0; }
+  .th__stream { height: clamp(440px, 66vh, 560px); }
+  .th__chain { margin-top: 14px; height: 64px; }
+}
+
+.th.is-reduced .th__dot { animation: none; opacity: .8; transform: none; }

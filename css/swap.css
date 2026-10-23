@@ -1,0 +1,218 @@
+/* swap: the brain swap ceremony for visitors below the surface. One ink stroke, cream type, a pip in the corner. */
+.sw {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-swap);
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+.sw.is-on { display: block; }
+.sw-sr {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.sw-ink { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.sw-band, .sw-drops, .sw-wisps { fill: var(--ink); }
+.sw-glint { fill: var(--cream); opacity: .92; }
+.sw-husk { fill: color-mix(in oklab, var(--deep) 58%, var(--ink)); }
+
+/* ---------- the words on the stroke ---------- */
+.sw-type {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: .08em;
+  font-family: var(--serif);
+  font-size: 120px;
+  line-height: 1;
+  letter-spacing: -.025em;
+  white-space: nowrap;
+  color: var(--cream);
+  will-change: transform;
+}
+.sw-ver { display: inline-flex; align-items: baseline; }
+.sw-num { position: relative; display: inline-flex; }
+
+/* each glyph condenses out of the ink: soft and light, then sharp and heavy with a jelly settle */
+.sw-g {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(.08em);
+  translate: 0 .07em;
+  scale: 1.14 .88;
+  font-variation-settings: "opsz" 144, "wght" 330, "SOFT" 100, "WONK" 1;
+  transition:
+    opacity .55s var(--ease-out) var(--d, 0s),
+    filter .9s var(--ease-out) var(--d, 0s),
+    translate 1.1s var(--ease-jelly) var(--d, 0s),
+    scale 1.15s var(--ease-jelly) var(--d, 0s),
+    font-variation-settings 1.3s var(--ease-jelly) var(--d, 0s);
+}
+.sw-g.is-in, .sw-type.is-measure .sw-g {
+  opacity: 1;
+  filter: none;
+  translate: 0 0;
+  scale: 1;
+  font-variation-settings: "opsz" 144, "wght" 620, "SOFT" 100, "WONK" 1;
+}
+.sw-g--pop.is-in { transition-timing-function: var(--ease-out), var(--ease-out), var(--ease-jelly), cubic-bezier(.3, 1.9, .5, 1), var(--ease-jelly); }
+.sw-g.is-dim { opacity: .5; font-variation-settings: "opsz" 144, "wght" 360, "SOFT" 100, "WONK" 1; }
+.sw-g.is-out {
+  opacity: 0;
+  filter: blur(.06em);
+  translate: .05em -.05em;
+  scale: .92;
+  transition-duration: .26s, .3s, .4s, .4s, .4s;
+  transition-delay: var(--d, 0s);
+}
+/* at rest the letters breathe, each on its own beat */
+.sw-type.is-live .sw-g.is-in:not(.is-out):not(.is-dim) { animation: sw-breathe 3.4s var(--ease-in-out) calc(var(--i, 0) * .45s) infinite alternate; }
+@keyframes sw-breathe {
+  from { font-variation-settings: "opsz" 144, "wght" 620, "SOFT" 100, "WONK" 1; }
+  to { font-variation-settings: "opsz" 144, "wght" 700, "SOFT" 40, "WONK" 1; }
+}
+/* the new brain's first heartbeat: a quick squeeze, a slow release */
+.sw-ver--new { transform-origin: 50% 60%; }
+.sw-type.is-beat .sw-ver--new { animation: sw-beat 1.2s linear 1; }
+@keyframes sw-beat {
+  0% { scale: 1; animation-timing-function: cubic-bezier(.2, .7, .3, 1); }
+  25% { scale: 1.1 .94; animation-timing-function: cubic-bezier(.34, 1.56, .64, 1); }
+  100% { scale: 1; }
+}
+
+.sw-arrow {
+  display: inline-block;
+  width: 1.04em;
+  height: .52em;
+  margin: 0 .05em 0 .03em;
+  translate: 0 .04em;
+  transition: opacity .35s var(--ease-out);
+}
+.sw-arrow svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.sw-arrow path { fill: var(--cream); }
+.sw-arrow.is-out { opacity: 0; }
+
+/* the empty slot waits as a bubble, then pops when the new brain lands */
+.sw-bubble {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: .44em; height: .44em;
+  margin: -.24em 0 0 -.2em;
+  overflow: visible;
+  fill: var(--cream);
+  opacity: 0;
+  scale: .2;
+  transition: opacity .3s var(--ease-out), scale .8s var(--ease-jelly);
+}
+.sw-bubble.is-on { opacity: 1; scale: 1; animation: sw-bob 1.6s var(--ease-in-out) infinite alternate; }
+.sw-bubble.is-pop { opacity: 0; scale: 1.8; transition: opacity .22s var(--ease-out), scale .26s var(--ease-out); }
+@keyframes sw-bob {
+  from { translate: 0 .03em; rotate: -6deg; }
+  to { translate: 0 -.05em; rotate: 8deg; }
+}
+
+/* the small lines written inside the stroke */
+.sw-kicker, .sw-meta {
+  position: absolute;
+  left: .03em;
+  margin: 0;
+  white-space: nowrap;
+  color: var(--cream);
+  letter-spacing: 0;
+  transition: opacity .35s var(--ease-out);
+}
+.sw-kicker {
+  bottom: 100%;
+  min-height: 1.25em;
+  font: italic 400 19px/1.25 var(--serif);
+  font-variation-settings: "opsz" 20, "SOFT" 100, "WONK" 1, "wght" 420;
+}
+.sw-kicker__t {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(3px);
+  translate: 0 .3em;
+  transition: opacity .5s var(--ease-out), filter .6s var(--ease-out), translate .85s var(--ease-jelly);
+}
+.sw-kicker__t.is-in { opacity: .94; filter: none; translate: 0 0; }
+.sw-meta {
+  top: 100%;
+  min-height: 1.3em;
+  font: 400 12px/1.3 var(--mono);
+  opacity: .66;
+}
+.sw-close {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: -6px;
+  padding: 6px 4px 10px;
+  border: 0;
+  background: none;
+  color: var(--cream);
+  font: 400 12px/1.3 var(--mono);
+  letter-spacing: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: .62;
+  transition: opacity .3s var(--ease-out);
+}
+.sw-close svg { position: absolute; left: 3px; right: 3px; bottom: 4px; width: calc(100% - 6px); height: 6px; overflow: visible; fill: currentColor; transform-origin: 0 50%; transition: scale .6s var(--ease-jelly); }
+.sw-close:hover, .sw-close:focus-visible { opacity: 1; outline: none; }
+.sw-close:hover svg, .sw-close:focus-visible svg { scale: 1.12 1.5; }
+/* no brush underline under "Close" (owner, 20 Oct 2026: AI slop); the link is its word alone */
+.sw-close svg { display: none; }
+.sw.is-leaving .sw-kicker, .sw.is-leaving .sw-meta, .sw.is-leaving .sw-close { opacity: 0; pointer-events: none; }
+
+/* ---------- the diff chips: they fall onto the stroke and settle on its slope ---------- */
+.sw-chips { position: absolute; inset: 0; }
+.sw-chip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+.sw-chip.is-on { opacity: 1; transition: opacity .18s var(--ease-out); }
+.sw-chip__ink, .sw-chip__strike { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.sw-chip__t { position: relative; font: 600 13px/1 var(--mono); letter-spacing: 0; white-space: nowrap; }
+.sw-chip--add .sw-chip__ink { fill: var(--cream); }
+.sw-chip--add .sw-chip__t { color: var(--ink); }
+.sw-chip--del .sw-chip__ink, .sw-chip--same .sw-chip__ink { fill: var(--cream); }
+.sw-chip--del .sw-chip__t, .sw-chip--same .sw-chip__t { color: var(--ink); opacity: .6; font-weight: 400; }
+.sw-chip__strike { fill: var(--ink); }
+
+/* ---------- the pip: a small Turri in the corner that plays the transplant ---------- */
+.sw-pip {
+  position: absolute;
+  left: 8px;
+  bottom: -44px;
+  width: 210px;
+  height: 270px;
+  --jelly-glass: var(--bg);
+  translate: 0 120%;
+  transition: translate 1.15s var(--ease-jelly);
+}
+.sw-pip.is-in { translate: 0 0; }
+.sw-pip.is-out { translate: 0 125%; transition: translate .95s var(--ease-sink); }
+
+@media (max-width: 720px) {
+  .sw-kicker { font-size: 14px; }
+  .sw-meta, .sw-close { font-size: 11px; }
+  .sw-close { padding: 12px 8px 14px; margin: -12px -6px 0 0; }
+  .sw-close svg { bottom: 8px; left: 8px; width: calc(100% - 16px); }
+  .sw-chip__t { font-size: 11.5px; }
+  .sw-pip { left: 0; bottom: -30px; width: 132px; height: 172px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-type.is-live .sw-g, .sw-bubble.is-on, .sw-type.is-beat .sw-ver--new { animation: none; }
+}

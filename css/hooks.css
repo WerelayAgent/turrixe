@@ -1,0 +1,151 @@
+/* hooks: my tentacles are my functions. A big Turri holds one glass capsule per live hook on a fine ink thread.
+   Geometry and motion live in js/modules/hooks.js; this file is the paint. */
+/* On phones the jelly is wider than the text column. The mount bleeds into the section gutter and clips there,
+   so the jelly paints right up to the screen edge but never adds to the page's scroll width (no sideways pan).
+   The clip sits here, not on .hk-stage: Chrome ignores overflow-clip-margin when only one axis is clipped.
+   overflow-x: clip leaves y visible, so dying capsules can still sink out of the stage. The geometry never
+   leans on the clip (hooks.js keeps the jelly inside this box and tilts sinking capsules away from the edge);
+   it is only the safety net, and browsers without overflow: clip (Safari before 16) get a plain hidden. */
+#hooks {
+  position: relative;
+  margin-inline: calc(-1 * var(--gutter));
+  padding-inline: var(--gutter);
+  overflow-x: clip;
+}
+@supports not (overflow-x: clip) {
+  #hooks { overflow: hidden; }
+}
+/* No transitions on the stage, ever: its height must land in the same frame as the scroll that pays for it.
+   (The reduced-motion rule in base.css gives every element a .01ms transition on all properties, which would
+   defer the height by a frame and hide it from the measurement in hooks.js.) */
+.hk-stage { position: relative; width: 100%; min-height: 360px; transition: none; }
+.hk-jelly { position: absolute; z-index: 1; }
+/* the threads run behind the jelly, so where they cross a tentacle it reads as depth, not a tangle */
+.hk-threads {
+  position: absolute; left: 0; top: 0; z-index: 0;
+  width: 100%; height: 100%;
+  overflow: visible; pointer-events: none;
+}
+.hk-th { fill: var(--ink); transition: opacity .9s var(--ease-out); }
+.hk-th-lit { fill: var(--cream); }
+.hk-cards { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+
+/* ---------- the capsule: glass like my bell, an ink rim that pools at the bottom, a cream glint ---------- */
+.hk-card {
+  position: absolute; left: 0; top: 0; z-index: 1;
+  color: var(--ink);
+  pointer-events: auto;
+  cursor: pointer;
+  will-change: transform, opacity;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.hk-card__glass { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+/* The glass is the only thing that ever changes colour behind the text, and it only ever goes lighter than
+   (or as light as) the water violet, so ink text keeps at least 4.8:1 on it in every state. */
+.hk-glass { fill: var(--field); transition: fill 1.8s var(--ease-out); }
+.hk-rim, .hk-knot, .hk-flood { fill: var(--ink); }
+.hk-glint, .hk-shine { fill: var(--cream); }
+.hk-glint { transform-box: fill-box; transform-origin: 30% 30%; transition: transform .8s var(--ease-jelly), opacity .9s var(--ease-out); }
+.hk-shine { opacity: 0; transition: opacity 1.6s var(--ease-out); }
+.hk-card.is-lit .hk-shine { opacity: 1; transition-duration: .7s; }
+.hk-card.is-hover .hk-glint { transform: scale(1.12); }
+
+/* every line of text is solid ink on the glass, always: hierarchy comes from size, face and weight, never fading */
+.hk-card__body { position: relative; padding: 23px 26px 25px; transition: opacity .9s var(--ease-out); }
+.hk-card__age {
+  margin: 0 0 7px; padding-right: 46px;
+  font: 400 11.5px/1.3 var(--mono); letter-spacing: .01em;
+}
+.hk-card__name {
+  margin: 0 0 8px; padding-right: 28px;
+  font-family: var(--serif); font-weight: 600;
+  font-size: clamp(21px, 1.75vw, 26px); line-height: 1.04; letter-spacing: -.022em;
+  /* hooks.js breathes SOFT (it reshapes the letters without changing their width, so it never re-wraps) in
+     quantised steps: a CSS animation of font axes re-shapes and re-lays out every name on every frame */
+  font-variation-settings: "opsz" 72, "wght" 600, "SOFT" 100, "WONK" 1;
+}
+.hk-card__rule {
+  margin: 0 0 15px;
+  font-size: 15px; line-height: 1.37;
+  font-variation-settings: "opsz" 14, "SOFT" 50, "WONK" 0;
+  text-wrap: pretty;
+}
+.hk-card__stat { margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 9px; row-gap: 3px; }
+.hk-odo {
+  display: inline-flex;
+  font-family: var(--serif);
+  font-size: clamp(28px, 2.3vw, 35px); line-height: 1; letter-spacing: -.01em;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-variation-settings: "opsz" 144, "wght" 540, "SOFT" 60, "WONK" 1;
+}
+.hk-d { position: relative; display: inline-block; height: 1em; overflow: hidden; }
+.hk-reel { display: flex; flex-direction: column; }
+/* cells 1.25em apart in a 1em window: see odometer.js */
+.hk-reel i { display: block; height: 1.25em; line-height: 1.25; font-style: normal; text-align: center; }
+.hk-g { display: inline-block; }
+.hk-card__unit { font: 400 12px/1.2 var(--mono); }
+.hk-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* the version stamp: an ink seal with cream mono, pressed on the rim */
+.hk-seal {
+  position: absolute; top: -11px; right: 18px;
+  width: 44px; height: 40px;
+  display: grid; place-items: center;
+  color: var(--cream);
+  font: 600 12px/1 var(--mono); letter-spacing: -.01em;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+.hk-seal[hidden] { display: none; }
+.hk-seal svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.hk-seal path { fill: var(--ink); }
+.hk-seal__v { position: relative; }
+
+/* ---------- entrance: the glass is blown, the words write themselves in ink ---------- */
+.hk-card .hk-card__age, .hk-card .hk-card__name, .hk-card .hk-w, .hk-card .hk-card__stat, .hk-card .hk-seal {
+  opacity: 0;
+  transform: translateY(.45em);
+}
+.hk-card .hk-seal { transform: rotate(-30deg) scale(.4); }
+.hk-card.is-in .hk-card__age, .hk-card.is-in .hk-card__name, .hk-card.is-in .hk-w, .hk-card.is-in .hk-card__stat {
+  opacity: 1; transform: none;
+  transition: opacity .6s var(--ease-out) var(--t, 0ms), transform 1s var(--ease-jelly) var(--t, 0ms);
+}
+.hk-card.is-in .hk-seal {
+  opacity: 1; transform: rotate(-8deg);
+  transition: opacity .4s var(--ease-out) .9s, transform .9s var(--ease-jelly) .9s;
+}
+.hk-card.is-in .hk-card__age { --t: 60ms; }
+.hk-card.is-in .hk-card__name { --t: 140ms; }
+.hk-card.is-in .hk-w { --t: calc(200ms + var(--i) * 20ms); }
+.hk-card.is-in .hk-card__stat { --t: 520ms; }
+.hk-w { display: inline-block; }
+
+/* ---------- brain swap: the functions go quiet while the bell is empty ----------
+   Only the glass reacts: it goes dull (same lightness, less violet) and its glint goes out. The text stays ink. */
+.hk-card.is-dim .hk-glass { fill: color-mix(in oklab, var(--field) 58%, #8d8a96); }
+.hk-card.is-dim .hk-glint { opacity: 0; }
+
+/* ---------- fresh glass: blown wet and pale, it dries to the water colour (decoration only) ---------- */
+.hk-card.is-wet .hk-glass { fill: color-mix(in oklab, var(--field) 72%, var(--cream)); transition: none; }
+.hk-card.is-wet .hk-shine { opacity: 1; transition: none; }
+.hk-card.is-wet .hk-glint { transform: scale(1.16); }
+
+/* ---------- dying: the glass floods with ink, the text goes under ---------- */
+.hk-card.is-dying { pointer-events: none; z-index: 0; }
+.hk-card.is-dying .hk-card__body { opacity: 0; transition: opacity .8s var(--ease-sink) .3s; }
+.hk-card.is-dying .hk-seal { opacity: 0; transition: opacity .6s var(--ease-sink) .5s; }
+
+/* ---------- keyboard focus: the same light as a hover, plus a hand-drawn underline on the name ---------- */
+.hk-card:focus-visible .hk-card__name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+@media (max-width: 720px) {
+  .hk-card__body { padding: 21px 22px 23px; }
+  .hk-card__rule { font-size: 14.5px; }
+  .hk-card__name { font-size: 22px; }
+}
+
+/* ---------- reduced motion: final states only ---------- */
+.hk-stage.is-still .hk-card .hk-card__age, .hk-stage.is-still .hk-card .hk-card__name, .hk-stage.is-still .hk-card .hk-w,
+.hk-stage.is-still .hk-card .hk-card__stat, .hk-stage.is-still .hk-card .hk-seal { transition: none !important; }

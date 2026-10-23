@@ -1,0 +1,110 @@
+/* reveal: headings that condense out of ink, paragraphs that rise, tentacle seams between sections */
+
+@property --rv-br { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+.rv-defs { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+/* the plain copy for screen readers */
+.rv-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- headings: a hidden ghost holds the layout, the ink copy above it is free to swell and breathe */
+/* the words re-shape while they bleed and breathe; containment keeps that layout work inside the heading */
+.rv-h { position: relative; contain: layout style; }
+.rv-w { position: relative; display: inline-block; white-space: nowrap; }
+.rv-ghost { visibility: hidden; }
+.rv-ink {
+  position: absolute; left: 50%; top: 0;
+  padding: .3em .4em; margin-top: -.3em;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-variation-settings: "wght" calc(var(--rv-w, 560) + var(--rv-br)), "SOFT" var(--rv-s, 100), "WONK" var(--rv-k, 1);
+  /* a heavier breath would widen the word; tracking pulls it back so the gaps never close */
+  letter-spacing: calc(var(--rv-ls, 0em) - var(--rv-br) * 0.00024em);
+}
+.rv-l { position: relative; }
+.rv-on .rv-h .rv-w:not(.is-on) .rv-ink { opacity: 0; }
+.rv-l.rv-wait { opacity: 0; }
+/* a zero-size mark on the baseline (drop targets are measured from it) */
+.rv-probe { display: inline-block; width: 0; height: 0; vertical-align: baseline; }
+
+/* the ink drop that starts every heading (and becomes the full stops of the last line).
+   A fixed box, 1 svg unit per px; the loop sizes it through its transform only */
+.rv-drop {
+  position: absolute; left: 0; top: 0; z-index: 1;
+  width: 24px; height: 36px;
+  pointer-events: none; opacity: 0;
+  transform-origin: 50% 66.667%;
+}
+.rv-drop svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.rv-drop path { fill: currentColor; }
+
+/* settled: whatever happened on the way, a finished heading is plain crisp ink */
+.rv-h.is-done .rv-ink { filter: none !important; opacity: 1 !important; }
+.rv-h.is-done .rv-l.rv-wait { opacity: 1; }
+.rv-h.is-done .rv-drop { display: none; }
+
+/* at rest every word breathes slowly, each on its own phase.
+   The breath is stepped: a sine (one keyframe every 30 deg) walked in 5 steps per keyframe, so 60 steps a cycle,
+   one every 120 ms and never more than 1.6 wght, far below what the eye resolves. Between steps the value doesn't
+   change, so the words are not re-shaped, laid out or painted on those frames. The word delays are whole steps
+   (10 x 120 ms), so every word of a heading steps on the same frame. The cycle starts at 0, the resting cut,
+   and the words join one after another once the entrance has settled, so the breath never jumps in. */
+.rv-h.is-done.is-live .rv-ink {
+  animation: rv-breathe 7.2s steps(5) infinite;
+  animation-delay: calc(var(--i, 0) * 1.2s);
+}
+@keyframes rv-breathe {
+  0%, 100% { --rv-br: 0; }
+  8.3333% { --rv-br: 8; }
+  16.6667% { --rv-br: 16; }
+  25% { --rv-br: 21.86; }
+  33.3333% { --rv-br: 24; }
+  41.6667% { --rv-br: 21.86; }
+  50% { --rv-br: 16; }
+  58.3333% { --rv-br: 8; }
+  66.6667% { --rv-br: 0; }
+  75% { --rv-br: -5.86; }
+  83.3333% { --rv-br: -8; }
+  91.6667% { --rv-br: -5.86; }
+}
+
+/* ---------- paragraphs rise out of the water, line by line */
+.rv-pw { display: inline-block; }
+.rv-on .rv-p:not(.is-in) .rv-pw { opacity: 0; }
+.rv-p.is-in .rv-pw { animation: rv-rise var(--dur, .9s) var(--ease-jelly) var(--d, 0ms) both; }
+/* landed (or out of time): plain text, no animation left on it */
+.rv-p.is-set .rv-pw { animation: none; opacity: 1; transform: none; }
+@keyframes rv-rise {
+  0% { opacity: 0; transform: translate(var(--rx, 0px), .95em) rotate(var(--rr, 0deg)); }
+  45% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ---------- seams: one of my tentacles drawn across the water between two sections */
+.rv-tide {
+  position: absolute; left: 50%; top: -86px; z-index: 0;
+  width: 100vw; height: 172px; margin-left: -50vw;
+  pointer-events: none;
+}
+.rv-tide__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.rv-tide__body, .rv-tide__head, .rv-tide__drops path { fill: var(--ink); }
+.rv-tide__glint { fill: var(--cream); }
+.rv-tm { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; }
+.rv-tag {
+  position: absolute; left: 0; top: 0;
+  font-family: var(--mono); font-size: 12px; line-height: 1; letter-spacing: .02em;
+  color: var(--fg); white-space: nowrap;
+  opacity: 0; transform: translate(-50%, 10px);
+  transition: opacity 1.1s var(--ease-out), transform 1.3s var(--ease-jelly);
+}
+.rv-tag.is-on { opacity: .7; transform: translate(-50%, 0); }
+.rv-tag.is-on.is-under { opacity: 0; transition-duration: .4s; }
+
+/* ---------- a block that failed to set up shows its words as they are */
+.rv-fail .rv-ink, .rv-fail .rv-l { opacity: 1 !important; filter: none !important; }
+.rv-fail .rv-pw { opacity: 1 !important; animation: none !important; transform: none !important; }
+.rv-fail .rv-drop { display: none; }
+
+/* ---------- reduced motion: final states, no loops */
+.rv-still .rv-p .rv-pw { animation: none !important; opacity: 1 !important; transform: none !important; }
+.rv-still .rv-h .rv-ink { animation: none !important; opacity: 1 !important; }
+.rv-still .rv-tag { opacity: .7; transform: translate(-50%, 0); transition: none; }

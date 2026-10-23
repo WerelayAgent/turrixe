@@ -1,0 +1,101 @@
+/* loader: the brain boot story (js/modules/loader.js). */
+
+/* The void covers the page from the very first paint, before any script runs. */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-loader);
+  background: var(--field);
+  overflow: hidden;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+/* if the scripts never arrive, the cover lets go on its own */
+#loader:empty { animation: ld-bail .6s var(--ease-out) 5s forwards; }
+@keyframes ld-bail { to { opacity: 0; visibility: hidden; } }
+#loader[hidden] { display: none; }
+
+/* once the canvas paints the void itself, the element's own cover steps aside so the ripple can open it */
+#loader.ld.is-live { background: transparent; }
+#loader.ld.is-skipping { opacity: 0; pointer-events: none; transition: opacity .45s var(--ease-out); }
+
+.ld-void,
+.ld-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ld-svg { overflow: visible; }
+
+.ld-ink { fill: var(--ink); }
+.ld-cream { fill: var(--cream); }
+.ld-glass { fill: var(--jelly-glass, var(--field)); }
+
+/* the install line: mono, bottom left like a console, the percentage on tabular figures */
+.ld-status {
+  position: absolute;
+  left: var(--gutter);
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .01em;
+  line-height: 1;
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .7s var(--ease-out), transform .9s var(--ease-out);
+}
+.ld-status.is-on { opacity: .82; transform: none; }
+.ld-status.is-out { opacity: 0; transform: translateY(-4px); transition-duration: .45s; }
+.ld-status__label { min-width: 21ch; }
+.ld-status__label.is-new { animation: ld-ink-in .6s var(--ease-out); }
+.ld-status__pct {
+  font-variant-numeric: tabular-nums;
+  min-width: 4ch;
+  text-align: right;
+  opacity: .62;
+  transition: opacity .5s var(--ease-out);
+}
+.ld-status.is-done .ld-status__pct { opacity: 1; }
+@keyframes ld-ink-in {
+  from { filter: blur(3px); opacity: .2; letter-spacing: .06em; }
+  to { filter: none; opacity: 1; letter-spacing: .01em; }
+}
+
+.ld-skip {
+  position: absolute;
+  right: var(--gutter);
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1;
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity .9s var(--ease-out);
+  pointer-events: none;
+}
+.ld-skip.is-on { opacity: .42; }
+
+/* phones: both lines sit centred at the bottom, under the tentacle tips */
+@media (max-width: 720px) {
+  .ld-status {
+    left: 50%;
+    bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+    gap: 12px;
+    font-size: 12px;
+    transform: translate(-50%, 6px);
+  }
+  .ld-status.is-on { transform: translate(-50%, 0); }
+  .ld-status.is-out { transform: translate(-50%, -4px); }
+  .ld-status__label { min-width: 0; }
+  .ld-skip { right: auto; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); }
+}
+
+/* reduced motion: just the void and the line, for a moment */
+.ld--quiet .ld-status { opacity: .82; transform: none; left: 50%; bottom: 50%; transform: translate(-50%, 50%); }

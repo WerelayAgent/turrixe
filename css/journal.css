@@ -1,0 +1,286 @@
+/* journal: every brain on one long ink tentacle, the ink diff, and the Book of Brains. Owner: journal module. */
+
+.jr {
+  --jr-mute: color-mix(in oklab, var(--fg) 50%, transparent);
+  --jr-x: 108px;                      /* where entry text starts, right of the spine */
+  --jr-code-fs: 13.5px;               /* the diff's mono size; the column count is measured from it */
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.14fr) minmax(320px, .86fr);
+  gap: clamp(32px, 5vw, 84px);
+  align-items: start;
+  color: var(--fg);
+}
+.jr-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.jr .jr-k { fill: var(--ink); }
+.jr .jr-c { fill: var(--cream); }
+
+/* ---------- the tentacle ---------- */
+.jr-time { position: relative; min-width: 0; padding: 6px 0 120px; }
+/* twenty characters of the diff's font: how wide one column is, so code wraps to fit exactly */
+.jr-probe { position: absolute; left: 0; top: 0; visibility: hidden; pointer-events: none; font: var(--jr-code-fs)/1 var(--mono); white-space: pre; }
+.jr-spine { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 2; }
+.jr-spine__body { fill: var(--ink); }
+.jr-spine__sparks { fill: var(--cream); opacity: .85; }
+.jr-spine__sel { fill: var(--cream); fill-rule: evenodd; }
+.jr-node { pointer-events: auto; cursor: pointer; }
+.jr-node__mass { fill: var(--ink); stroke: var(--bg); stroke-width: 46; paint-order: stroke; }
+.jr-node__folds { fill: var(--field); transition: fill .8s var(--ease-out); }
+.jr-node.is-now .jr-node__folds { fill: color-mix(in oklab, var(--field) 70%, var(--cream)); }
+
+/* ---------- entries ---------- */
+.jr-list { list-style: none; margin: 0; padding: 0; position: relative; z-index: 1; }
+.jr-e { position: relative; padding: 0 0 clamp(44px, 6vh, 70px) var(--jr-x); }
+.jr-e:last-child { padding-bottom: 0; }
+/* before launch: no brains yet, and the Book of Brains waits for the first one */
+.jr-empty {
+  padding: 4px 0 0 var(--jr-x);
+  font-family: var(--serif);
+  font-size: clamp(21px, 1.9vw, 28px);
+  line-height: 1.25;
+  font-variation-settings: "SOFT" 100, "WONK" 0, "opsz" 36;
+  opacity: .72;
+}
+.jr-book[hidden] { display: none; }
+
+.jr-e__ago {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin: 0 0 6px;
+  font: 12px/1.2 var(--mono); letter-spacing: .01em;
+  opacity: .74;
+}
+.jr-e__live { display: none; align-items: center; gap: 6px; color: var(--cream); }
+.jr-e__live svg { width: 9px; height: 9px; fill: var(--cream); animation: jr-dot 2.4s var(--ease-in-out) infinite; }
+.jr-e.is-now .jr-e__live { display: inline-flex; }
+.jr-e.is-now .jr-e__ago { opacity: 1; }
+@keyframes jr-dot { 0%, 100% { transform: scale(.7); opacity: .55; } 12% { transform: scale(1.15); opacity: 1; } 24% { transform: scale(.9); } 34% { transform: scale(1.05); } }
+
+.jr-e__head { display: flex; align-items: baseline; gap: 6px 20px; flex-wrap: wrap; }
+.jr-e__v {
+  appearance: none; background: none; border: 0; padding: 0; margin: 0; cursor: pointer;
+  color: inherit;
+  font-family: var(--serif);
+  font-size: clamp(42px, 4.3vw, 66px);
+  line-height: .9;
+  letter-spacing: -0.045em;
+  font-weight: 560;
+  font-variation-settings: "SOFT" 100, "WONK" 0, "opsz" 144;
+  transition: font-variation-settings .9s var(--ease-jelly), font-weight .9s var(--ease-jelly), opacity .5s, color .6s;
+  opacity: .9;
+}
+.jr-e__v:hover, .jr-e.is-sel .jr-e__v { font-weight: 720; font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144; opacity: 1; }
+.jr-e.is-sel .jr-e__v { color: var(--cream); }
+.jr-e__title {
+  margin: 0;
+  font-size: clamp(24px, 2.15vw, 34px);
+  line-height: 1.06;
+  letter-spacing: -0.018em;
+  font-weight: 420;
+  font-variation-settings: "SOFT" 80, "WONK" 0;
+  max-width: 22ch;
+}
+
+/* hook chips: a brush swatch behind what grew, a fine pen strike through what fell off.
+   The strike crosses the name only (the minus stays clear), through the x-height middle, about a pixel thick,
+   so the letters read through it. */
+.jr-e__chips, .jr-page__chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 10px; }
+.jr-e__chips { margin-top: 14px; }
+.jr-chip {
+  position: relative;
+  display: inline-flex; align-items: center;
+  height: 26px; padding: 0 13px;
+  font: 12px/1 var(--mono); letter-spacing: 0; white-space: nowrap;
+}
+.jr-chip span { position: relative; }
+.jr-chip__ink { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: var(--ink); }
+.jr-chip--add span { color: var(--cream); }
+.jr-chip--del span { color: color-mix(in oklab, var(--fg) 80%, transparent); }
+.jr-chip__name { display: inline-block; line-height: 1; }
+.jr-chip__strike {
+  position: absolute; left: -.4em; top: 0;
+  width: calc(100% + .96em); height: 1em;
+  overflow: visible; fill: var(--ink); pointer-events: none;
+}
+@keyframes jr-strike { from { clip-path: inset(0 100% 0 0); } }
+
+.jr-e__meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 18px;
+  margin-top: 14px;
+  font: 12px/1.3 var(--mono);
+}
+.jr-e__meta > span { opacity: .74; }
+.jr-e__hash b { font-weight: 400; color: var(--cream); }
+.jr-e__toggle {
+  appearance: none; background: none; border: 0; padding: 4px 0; margin: 0; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 9px;
+  font: inherit; color: inherit;
+}
+.jr-e__tl { text-decoration: underline; text-decoration-style: wavy; text-decoration-thickness: 1px; text-underline-offset: 5px; text-decoration-color: color-mix(in oklab, var(--fg) 55%, transparent); }
+.jr-e__toggle:hover .jr-e__tl { text-decoration-color: currentColor; }
+.jr-e__plus { color: var(--cream); }
+.jr-e__minus { opacity: .6; }
+.jr-e__chev { width: 13px; height: 9px; fill: currentColor; transition: transform .6s var(--ease-jelly); }
+.jr-e.is-open .jr-e__chev { transform: rotate(180deg); }
+
+/* ---------- the diff ----------
+   Rows are wrapped in JS to the measured column (journal/code.js), so nothing scrolls sideways: a long line keeps
+   its + or − in the sign column and hangs its continuation rows two columns deeper. */
+.jr-e__diff { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .8s var(--ease-out), opacity .5s var(--ease-out); }
+.jr-e.is-open .jr-e__diff { grid-template-rows: 1fr; opacity: 1; }
+.jr-e__diff-in { min-height: 0; overflow: hidden; }
+.jr-code {
+  margin: 16px 0 4px;
+  padding: 4px 0 8px;
+  font: var(--jr-code-fs)/1.7 var(--mono);
+  white-space: pre;
+  tab-size: 4;
+}
+.jr-code code { font: inherit; }
+.jr-lg { display: block; }
+.jr-ln { display: block; position: relative; padding-left: 2.4ch; }
+.jr-ln__sign { position: absolute; left: 0; top: 0; font-weight: 400; }
+.jr-ln__txt { position: relative; display: inline-block; }
+.jr-ln--add, .jr-ln--add .jr-ln__sign { color: var(--cream); }
+.jr-ln--del { color: var(--jr-mute); }
+.jr-ln--del .jr-ln__txt { color: var(--jr-mute); }
+.jr-ln__txt i { font-style: normal; display: inline-block; transform-origin: 50% 80%; }
+.jr-ln__blot {
+  position: absolute; left: -0.8em; top: 0;
+  width: calc(var(--n) * 1ch + 2.2em); height: 1.7em;
+  overflow: visible; fill: var(--ink); pointer-events: none;
+}
+.jr-ln__nib { position: absolute; left: 0; top: .32em; width: .6em; height: .74em; fill: var(--cream); opacity: 0; pointer-events: none; }
+
+/* armed: waiting to be written; play: blot what died, then write what was born */
+.jr-code.is-armed .jr-ln--add i, .jr-code.is-armed .jr-ln--add .jr-ln__sign { opacity: 0; }
+.jr-code.is-play .jr-ln--add .jr-ln__sign { animation: jr-sign .4s var(--ease-out) calc(var(--at) * 1s) both; }
+@keyframes jr-sign { from { opacity: 0; } to { opacity: 1; } }
+/* lift the ink to read what I deleted: hover with a mouse, tap on a phone (the whole line, every row of it) */
+.jr-ln--del .jr-ln__blot { transition: opacity .45s var(--ease-out); }
+@media (hover: hover) { .jr-lg--del:hover .jr-ln__blot { opacity: .16; } }
+.jr-lg--del.is-lift .jr-ln__blot { opacity: .16; }
+.jr-code.is-armed .jr-ln--del .jr-ln__blot { clip-path: inset(0 100% 0 0); }
+.jr-code.is-armed .jr-ln--del .jr-ln__txt { color: var(--fg); }
+.jr-code.is-play .jr-ln--del .jr-ln__blot { animation: jr-blot .56s cubic-bezier(.55, .05, .3, 1) calc(var(--at) * 1s) both; }
+.jr-code.is-play .jr-ln--del .jr-ln__txt { animation: jr-mute .7s var(--ease-out) calc(var(--at) * 1s + .25s) both; }
+.jr-code.is-play .jr-ln--add i { animation: jr-write .55s cubic-bezier(.2, .9, .3, 1.25) calc(var(--at) * 1s + var(--k) * 22ms) both; }
+.jr-code.is-play .jr-ln--add .jr-ln__nib { animation: jr-nib calc((var(--n) - var(--l, 0)) * 22ms + 320ms) linear calc(var(--at) * 1s) both; }
+@keyframes jr-blot { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes jr-mute { from { color: var(--fg); } to { color: var(--jr-mute); } }
+@keyframes jr-write {
+  0% { opacity: 0; transform: translateY(.28em) scale(1.5, .6); }
+  40% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+/* the nib starts where the ink starts (after a row's indent) */
+@keyframes jr-nib {
+  0% { opacity: 0; transform: translateX(calc(var(--l, 0) * 1ch - .4ch)) rotate(-8deg); }
+  8% { opacity: 1; }
+  86% { opacity: 1; transform: translateX(calc(var(--n) * 1ch)) rotate(6deg); }
+  100% { opacity: 0; transform: translateX(calc(var(--n) * 1ch + .5ch)) translateY(.5em) scale(.4); }
+}
+
+/* a new brain's entry rises once its node has landed */
+.jr-e.is-unborn { opacity: 0; }
+.jr-e.is-born > * { animation: jr-rise .95s var(--ease-jelly) both; }
+.jr-e.is-born > :nth-child(2) { animation-delay: .07s; }
+.jr-e.is-born > :nth-child(3) { animation-delay: .16s; }
+.jr-e.is-born > :nth-child(4) { animation-delay: .24s; }
+.jr-e.is-born > :nth-child(5) { animation-delay: .3s; }
+@keyframes jr-rise { from { opacity: 0; transform: translateY(16px); } }
+/* a hook the new brain dropped gets struck through once its entry has risen */
+.jr-e.is-born .jr-chip__strike { animation: jr-strike .55s cubic-bezier(.55, .05, .3, 1) .75s both; }
+
+/* ---------- Book of Brains ---------- */
+.jr-book { position: sticky; top: 92px; display: grid; gap: 18px; min-width: 0; margin-right: clamp(0px, (1640px - 100vw) * .22, 48px); }
+.jr-scrub__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.jr-scrub__title {
+  margin: 0;
+  font-style: italic;
+  font-size: clamp(19px, 1.45vw, 23px);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  animation: jr-breathe 6s var(--ease-in-out) infinite;
+}
+@keyframes jr-breathe { 50% { font-variation-settings: "SOFT" 40, "WONK" 0; font-weight: 470; } }
+.jr-scrub__count { margin: 0; font: 12px/1 var(--mono); opacity: .82; white-space: nowrap; }
+.jr-scrub__now { color: var(--cream); }
+.jr-scrub__track { position: relative; margin-top: 6px; padding-bottom: 6px; touch-action: none; cursor: grab; border-radius: 8px; }
+.jr-scrub__track.is-drag { cursor: grabbing; }
+.jr-scrub__track:focus-visible { outline: 2px solid var(--cream); outline-offset: 6px; }
+.jr-scrub__svg { display: block; overflow: visible; }
+.jr-scrub__line, .jr-scrub__beads { fill: var(--ink); }
+.jr-scrub__live, .jr-scrub__handle { fill: var(--cream); }
+.jr-scrub__labels { position: relative; height: 14px; margin-top: 2px; }
+.jr-scrub__l {
+  position: absolute; top: 0; transform: translateX(-50%);
+  font: 11px/1 var(--mono); white-space: nowrap;
+  opacity: .5;
+  transition: opacity .35s var(--ease-out), color .35s;
+}
+.jr-scrub__l.is-on { opacity: 1; color: var(--cream); }
+
+.jr-page {
+  position: relative;
+  padding: 24px 30px 30px;
+  color: var(--ink);
+  transform: rotate(-1.1deg);
+  transform-origin: 50% 0;
+}
+.jr-page__paper { position: absolute; left: -8px; top: -8px; overflow: visible; pointer-events: none; }
+.jr-page__sheet { fill: var(--cream); }
+.jr-page__stain { fill: var(--ink); }
+.jr-page__in { position: relative; }
+.jr-page__top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.jr-page__kicker { margin: 0; font-style: italic; font-size: 15px; color: var(--deep); font-variation-settings: "SOFT" 100, "WONK" 1; }
+.jr-page__no { margin: 0; font: 11px/1 var(--mono); color: var(--deep); padding-right: 34px; }
+.jr-page__portrait { display: block; width: 44%; max-width: 186px; margin: 10px auto 2px; overflow: visible; }
+.jr-page__mass { fill: var(--ink); }
+.jr-page__folds { fill: var(--cream); }
+.jr-page__name {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: clamp(30px, 2.5vw, 40px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-weight: 620;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 96;
+}
+.jr-page__title { margin: 6px 0 0; text-align: center; font-style: italic; font-size: 17px; line-height: 1.25; }
+.jr-page__life { margin: 10px 0 0; text-align: center; font: 11.5px/1.35 var(--mono); color: var(--deep); }
+.jr-page__said { margin: 18px 0 0; display: grid; gap: 10px; }
+.jr-page__q { margin: 0; font-size: 15.5px; line-height: 1.36; font-variation-settings: "SOFT" 60, "WONK" 0; }
+.jr-page__label { display: block; margin-bottom: 3px; font: 10.5px/1.2 var(--mono); letter-spacing: .02em; color: var(--deep); }
+.jr-page__hooks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 16px; }
+.jr-page__hooks .jr-page__label { display: inline; margin: 0; }
+.jr-page__grp { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.jr-page__none { font-style: italic; font-size: 15px; }
+.jr-page .jr-chip--del span { color: var(--deep); }
+.jr-page__hooks .jr-chip__strike { animation: jr-strike .5s cubic-bezier(.55, .05, .3, 1) .45s both; }
+.jr-page__rule { display: block; width: 96px; height: 10px; margin: 18px auto 0; fill: var(--ink); }
+.jr-page__epitaph {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: clamp(18px, 1.4vw, 21px);
+  line-height: 1.3;
+  font-style: italic;
+  font-weight: 430;
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  text-wrap: balance;
+}
+.jr-page__epitaph span { display: inline-block; animation: jr-word .9s var(--ease-out) calc(var(--w) * 60ms + .2s) both; }
+@keyframes jr-word { from { opacity: 0; transform: translateY(.4em); } }
+
+/* ---------- narrow: the tentacle first, the book after it ---------- */
+@media (max-width: 900px) {
+  .jr { grid-template-columns: minmax(0, 1fr); gap: 36px; --jr-x: 66px; --jr-code-fs: 11.5px; }
+  .jr-book { position: relative; top: 0; }
+  .jr-time { padding-bottom: 96px; }
+  .jr-e__v { font-size: 40px; }
+  .jr-e__title { font-size: 23px; }
+  .jr-page { padding: 22px 20px 26px; transform: rotate(-.8deg); }
+  .jr-page__portrait { width: 48%; }
+}
+
+/* ---------- still water ---------- */
+.jr--still .jr-e__live svg, .jr--still .jr-scrub__title { animation: none; }
+.jr--still .jr-page__epitaph span, .jr--still .jr-chip__strike { animation: none; }

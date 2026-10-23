@@ -1,0 +1,103 @@
+/* hero-jelly: Turri, the living centrepiece, plus the shared jelly parts used by createJelly() and createMark(). */
+.hj {
+  position: absolute;
+  inset: 0;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.hj.is-waiting { opacity: 0; }
+.hj.is-over { cursor: pointer; }
+.hj-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.hj-ink { fill: var(--ink); }
+.hj-cream { fill: var(--cream); }
+.hj-glass { fill: var(--jelly-glass, var(--field)); }
+.hj-glassc { fill: var(--jelly-glass, var(--field)); }
+.hj-over { pointer-events: none; }
+
+/* hover label: cream mono text on a hand-cut ink blot */
+.hj-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+}
+.hj-label__blot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  transform: scale(.82);
+  transform-origin: 0 50%;
+  transition: transform .7s var(--ease-jelly);
+}
+.hj-label.is-left .hj-label__blot { transform-origin: 100% 50%; }
+.hj-label__txt {
+  position: relative;
+  display: block;
+  width: max-content;
+  max-width: 236px;
+  padding: 2px 4px;
+  font-family: var(--mono);
+  color: var(--cream);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .45s var(--ease-out) .08s, transform .6s var(--ease-out) .08s;
+}
+.hj-label__name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  margin-bottom: 5px;
+}
+.hj-label__rule {
+  display: block;
+  font-size: 11.5px;
+  line-height: 1.5;
+  opacity: .84;
+}
+.hj-label.is-on { opacity: 1; transition: opacity .25s var(--ease-out); }
+.hj-label.is-on .hj-label__blot { transform: scale(1); }
+.hj-label.is-on .hj-label__txt { opacity: 1; transform: none; }
+
+/* the small watching jelly in the topbar */
+.topbar__mark.has-hj-mark { display: inline-flex; align-items: center; gap: 9px; }
+.hj-mark {
+  width: 38px;
+  height: 31px;
+  flex: none;
+  overflow: visible;
+  transform-origin: 50% 30%;
+  animation: hj-mark-breathe 2.8s var(--ease-in-out) infinite;
+}
+.hj-mark .hj-glass { fill: var(--field); }
+.topbar__mark:hover .hj-mark { animation-duration: 1.1s; }
+@keyframes hj-mark-breathe {
+  0%, 100% { transform: scale(1, 1) translateY(0); }
+  12% { transform: scale(1.06, .92) translateY(-1px); }
+  40% { transform: scale(.98, 1.03) translateY(-2px); }
+}
+
+/* on one-column layouts the jelly leads: it hangs above the name instead of below the fold */
+@media (max-width: 900px) {
+  .sec--surface > .hero-jelly {
+    order: -1;
+    width: min(100%, 440px);
+    aspect-ratio: 1 / 1;
+    margin: -8px auto 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hj-mark { animation: none; }
+}

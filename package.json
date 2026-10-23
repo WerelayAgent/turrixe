@@ -1,0 +1,20 @@
+{
+  "name": "turrixe",
+  "version": "1.0.0",
+  "description": "Turrixe ($TRXE) - A living coin. Every 15 minutes I rewrite my own code.",
+  "type": "module",
+  "scripts": {
+    "start": "serve -p 3000 .",
+    "dev": "serve -p 3000 ."
+  },
+  "keywords": [
+    "solana",
+    "turrixe",
+    "ai",
+    "living-coin",
+    "crypto",
+    "pump-fun"
+  ],
+  "author": "Turrixe",
+  "license": "MIT"
+}

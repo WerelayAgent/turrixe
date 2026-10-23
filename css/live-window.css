@@ -1,0 +1,163 @@
+/* live-window: the live feed in a small ink window in the corner (a pill on the surface and on phones). */
+.lw {
+  position: fixed;
+  left: clamp(12px, 1.6vw, 24px);
+  bottom: clamp(12px, 1.8vh, 22px);
+  z-index: 8;                      /* over the page and the gauge, under the swap ceremony and the cursor */
+  color: var(--cream);
+  pointer-events: none;
+  transition: transform .9s var(--ease-jelly);   /* when it steps aside for the countdown ring */
+}
+.lw a { color: inherit; text-decoration: none; }
+.lw__ink {
+  position: absolute;
+  left: -4px; top: -4px;
+  width: calc(100% + 8px); height: calc(100% + 8px);
+  z-index: -1;
+  overflow: visible;
+  fill: var(--ink);
+  /* a thin glass edge: over Turri's own ink the window still reads as a thing of its own */
+  stroke: var(--cream);
+  stroke-opacity: .3;
+  stroke-width: 1.3;
+  pointer-events: none;
+}
+
+/* the two shapes share the corner and trade places with a soft jelly overshoot */
+.lw__pill, .lw__win {
+  position: absolute;
+  left: 0; bottom: 0;
+  isolation: isolate;
+  transform-origin: 0 100%;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(.94);
+  transition:
+    opacity .45s var(--ease-out),
+    transform .7s var(--ease-jelly),
+    visibility 0s linear .7s;
+}
+.lw[data-mode="pill"] .lw__pill,
+.lw[data-mode="window"] .lw__win {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+  transition:
+    opacity .5s var(--ease-out) .08s,
+    transform .8s var(--ease-jelly) .08s,
+    visibility 0s;
+}
+.lw[data-mode="hidden"] .lw__pill,
+.lw[data-mode="hidden"] .lw__win { transform: translateY(130%); transition-timing-function: var(--ease-sink); }
+
+/* ---------- the pill ---------- */
+.lw__pill {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 16px 9px 12px;
+  max-width: min(440px, calc(100vw - 2 * clamp(12px, 1.6vw, 24px)));
+  white-space: nowrap;
+  font: 500 15px/1.2 var(--serif);
+  font-variation-settings: "wght" 430, "opsz" 14, "SOFT" 100, "WONK" 0;
+}
+.lw__pill-text { overflow: hidden; text-overflow: ellipsis; min-width: 0; opacity: .92; }
+.lw__pill-note:empty { display: none; }
+.lw__pill-note, .lw__live, .lw__brain, .lw__tag, .lw__ago, .lw__tx {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .01em;
+}
+.lw__pill-note { opacity: .55; flex: none; }
+.lw__live { flex: none; opacity: .9; }
+
+/* one of my eyes is the live light: it looks around and blinks (the lid is a vertical squash). js/core/eyes.js moves it
+   (--lx/--ly, .is-blink) on the same rounds the old keyframes ran, so the eye is restyled only while it moves */
+.lw__eye { width: 15px; height: 15px; flex: none; overflow: visible; }
+.lw__white { fill: var(--cream); }
+.lw__pupil { fill: var(--ink); transform: translate(var(--lx, 0px), var(--ly, 0px)); transition: transform .45s var(--ease-in-out); }
+.lw__lid { transform-origin: 0 0; transition: transform .2115s linear; }
+.is-blink .lw__lid { transform: scaleY(.08); transition-duration: .1175s; }
+
+/* ---------- the window ---------- */
+.lw__win {
+  width: min(304px, calc(100vw - 2 * clamp(12px, 1.6vw, 24px)));
+  padding: 12px 15px 13px;
+}
+.lw__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 26px;             /* room for the fold */
+}
+.lw__brain { margin-left: auto; opacity: .55; white-space: nowrap; }
+.lw__fold {
+  position: absolute;
+  right: 10px; top: 9px;
+  width: 22px; height: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--cream);
+  opacity: .6;
+  transition: opacity .3s var(--ease-out), transform .5s var(--ease-jelly);
+}
+.lw__fold::before {                /* an ink dash, not an icon */
+  content: "";
+  position: absolute;
+  left: 5px; right: 5px; top: 10px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px 1px 2px 1px;
+  transform: rotate(-3deg);
+}
+.lw__fold:hover { opacity: 1; transform: scale(1.12); }
+
+.lw__list {
+  list-style: none;
+  margin: 9px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.lw__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 8px;
+  row-gap: 2px;
+  transition: opacity .7s var(--ease-out), transform .9s var(--ease-jelly), filter .9s var(--ease-out);
+}
+.lw__item.is-new { opacity: 0; transform: translateY(-8px); filter: blur(3px); }
+.lw__item:nth-child(2) { opacity: .82; }
+.lw__item:nth-child(3) { opacity: .64; }
+.lw__meta { display: flex; gap: 8px; align-items: baseline; grid-column: 1 / -1; }
+.lw__tag { opacity: .7; }
+.lw__item--brain .lw__tag, .lw__item--act .lw__tag { opacity: 1; }
+.lw__ago { opacity: .45; }
+.lw__text {
+  font: 400 14.5px/1.3 var(--serif);
+  font-variation-settings: "wght" 400, "opsz" 14, "SOFT" 100, "WONK" 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.lw__tx { align-self: end; opacity: .55; }
+.lw__tx::after { content: " \2197"; }
+.lw__tx:hover { opacity: 1; }
+
+.lw__foot { margin-top: 11px; }
+.lw__open {
+  font: 600 14px/1 var(--serif);
+  font-variation-settings: "wght" 600, "opsz" 14, "SOFT" 100, "WONK" 1;
+}
+.lw__open::after { content: " \2192"; font-family: var(--mono); font-size: 12px; opacity: .8; }
+.lw__open:hover { font-variation-settings: "wght" 720, "opsz" 14, "SOFT" 100, "WONK" 1; }
+.lw__note { margin: 8px 0 0; font: 10.5px/1.35 var(--mono); opacity: .5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lw__pupil, .lw__lid { transition: none; }
+  .lw__item { transition: none; }
+}

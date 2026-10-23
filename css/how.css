@@ -1,0 +1,72 @@
+/* how (#how-diagram): one ink current through four stations, with a line of copy at each. */
+#how-diagram { position: relative; margin: 0 0 clamp(56px, 8vw, 120px); }
+.how { position: relative; width: 100%; height: 1200px; }
+.how__svg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+
+.how__ink { fill: var(--ink); }
+.how__cream { fill: var(--cream); }
+.how__glass { fill: var(--field); transition: fill-opacity .9s var(--ease-out); }
+.how__groove { fill: var(--field); }
+.how__route { fill: var(--cream); opacity: .26; }
+.how__glint { opacity: .78; }
+.how__price { opacity: .62; }
+.how__jarglint { opacity: .9; }
+/* station ii: the vault's jar, small */
+.how__air { fill: var(--cream); fill-opacity: .1; }
+.how__ticks { opacity: .8; }
+.how__glintlow { opacity: .7; }
+.how__corkglint { opacity: .85; }
+.how__specks { opacity: .5; }
+.how__st { transition: none; }
+.how__nib { transition: opacity .8s var(--ease-out); }
+
+.how__lab {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .02em;
+  fill: var(--cream); fill-opacity: .82;
+}
+.how__stamp {
+  font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: .02em;
+  fill: var(--cream); opacity: 0;
+}
+
+/* copy: a plate caption per station */
+.how__copy { position: absolute; margin: 0; z-index: 1; }
+.how__tag {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .2em .75em;
+  margin: 0 0 12px;
+  font-family: var(--mono); font-size: 13px; letter-spacing: .02em; line-height: 1.3;
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .9s var(--ease-out), transform 1s var(--ease-jelly);
+}
+.how__n {
+  font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1;
+  font-variation-settings: "SOFT" 100, "WONK" 1; font-weight: 500;
+  color: var(--cream);
+}
+.how__k { opacity: .92; }
+.how__v { color: var(--cream); opacity: .66; display: inline-block; }
+.how__line {
+  margin: 0;
+  font-size: clamp(22px, 2.05vw, 31px); line-height: 1.17; letter-spacing: -0.018em;
+  font-weight: 420; font-variation-settings: "SOFT" 100, "WONK" 1;
+  text-wrap: pretty;
+}
+.how__w {
+  display: inline-block;
+  opacity: 0; filter: blur(7px); transform: translateY(.32em);
+  transition: opacity .9s var(--ease-out), filter 1.15s var(--ease-out), transform 1.15s var(--ease-jelly);
+  transition-delay: calc(var(--i) * 55ms);
+}
+.how__copy.is-lit .how__tag { opacity: 1; transform: none; }
+.how__copy.is-lit .how__w { opacity: 1; filter: blur(0); transform: none; }
+
+@media (max-width: 720px) {
+  .how__line { font-size: 20px; line-height: 1.2; }
+  .how__tag { font-size: 12px; margin-bottom: 8px; }
+  .how__n { font-size: 17px; }
+  .how__lab { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .how__w, .how__tag { opacity: 1; filter: none; transform: none; transition: none; }
+}

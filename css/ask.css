@@ -1,0 +1,291 @@
+/* ask: a glass bubble to type into, a tiny Turri that watches the text, answers written word by word. */
+.ask {
+  position: relative;
+  max-width: 1040px;
+  margin: 0 0 18px;
+  --ask-jw: clamp(92px, 9.4vw, 138px);
+  --ask-pl: clamp(26px, 2.6vw, 38px);
+}
+.ask-ink { fill: var(--ink); }
+.ask-cream { fill: var(--cream); }
+.ask-glass { fill: var(--field); }
+.ask-line { fill: currentColor; }
+.ask-sglass { fill: var(--cream); opacity: 0; transition: opacity .35s var(--ease-out); }
+
+.ask__sr {
+  position: absolute !important;
+  width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.ask__stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--ask-jw) minmax(0, 1fr);
+  column-gap: clamp(18px, 2.6vw, 40px);
+  align-items: start;
+}
+.ask__jcol { position: relative; align-self: stretch; }
+.ask__jelly {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%;
+  cursor: pointer;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+.ask-jelly { display: block; width: 100%; height: auto; aspect-ratio: 600 / 700; overflow: visible; }
+.ask__talk { min-width: 0; padding-top: 4px; }
+
+/* what you asked, in mono, above the answer (empty until you ask; it rises in with a Web Animation) */
+.ask__heard {
+  display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline;
+  min-height: 1.5em;
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .01em;
+}
+.ask__heard-k { opacity: .55; }
+.ask__heard-k::after { content: ":"; }
+.ask__heard-q { opacity: .9; overflow-wrap: anywhere; }
+
+/* the answer: cream serif condensing out of ink, one word at a time.
+   JS holds its height while an answer is written and lets it glide to fit, so the input below never jumps. */
+.ask__said {
+  position: relative;
+  max-width: 20.5em;
+  min-height: 2.4em;
+  margin: 0 0 34px;
+  font-size: clamp(23px, 2.3vw, 37px);
+  line-height: 1.2;
+  letter-spacing: -0.014em;
+  font-variation-settings: "wght" 380, "SOFT" 100, "WONK" 0, "opsz" 72;
+  transition: height .6s var(--ease-out);
+}
+.ask__line { margin: 0; }
+.ask__line.is-sinking {
+  position: absolute;
+  left: 0; right: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(.8em) scale(.985);
+  filter: blur(3px);
+  transition: opacity .9s var(--ease-out), transform 1.2s var(--ease-sink), filter 1s var(--ease-out);
+}
+/* A word at rest is crisp and settled. The ink cloud it condenses from (opacity, blur 9px, a jelly rise and
+   wght 820 settling to 380) is a Web Animation laid over this style in ask.js, so nothing can leave it blurred. */
+.ask__w {
+  display: inline-block;
+  transform-origin: 50% 80%;
+}
+.ask__code {
+  font-family: var(--mono);
+  font-size: .56em;
+  letter-spacing: 0;
+  vertical-align: .2em;
+  padding: .1em .2em;
+  word-break: break-all;
+  cursor: copy;
+  text-decoration: underline dotted;
+  text-underline-offset: .3em;
+}
+.ask__code.is-copied { text-decoration: none; opacity: .6; }
+
+/* the bubble cursor at the end of the newest word */
+.ask__dot {
+  display: inline-block;
+  width: .42em; height: .42em;
+  margin-left: .16em;
+  vertical-align: .05em;
+  animation: ask-dot 1.5s var(--ease-in-out) infinite;
+}
+.ask__dot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+@keyframes ask-dot {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-.16em) scale(.88, 1.08); }
+}
+
+/* the glass bubble you type into */
+.ask__form { position: relative; max-width: 680px; }
+.ask__bubble { position: relative; height: clamp(70px, 6.2vw, 90px); }
+.ask__membrane {
+  position: absolute;
+  left: -20px; top: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  overflow: visible;
+  pointer-events: none;
+}
+.ask__input,
+.ask__ph {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(18px, 1.5vw, 23px);
+  letter-spacing: -0.005em;
+}
+.ask__input {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  margin: 0;
+  padding: 0 92px 0 var(--ask-pl);
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  caret-color: var(--ink);
+  font-variation-settings: "wght" 440, "SOFT" 100, "WONK" 1, "opsz" 36;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.ask__input::selection { background: var(--ink); color: var(--cream); }
+.ask__ph {
+  position: absolute;
+  left: var(--ask-pl);
+  top: 50%;
+  transform: translateY(-54%);
+  color: var(--ink);
+  opacity: .62;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity .35s var(--ease-out), transform .7s var(--ease-jelly);
+}
+.ask__ph span {
+  display: inline-block;
+  animation: ask-breathe 3.6s var(--ease-in-out) infinite;
+  animation-delay: calc(var(--i) * -0.17s);
+}
+@keyframes ask-breathe {
+  0%, 100% { font-variation-settings: "wght" 330, "SOFT" 100, "WONK" 1, "opsz" 36; translate: 0 0; }
+  50% { font-variation-settings: "wght" 610, "SOFT" 10, "WONK" 0, "opsz" 36; translate: 0 -2px; }
+}
+.ask__form.is-focus .ask__ph { opacity: .42; }
+.ask__form.has-text .ask__ph { opacity: 0; transform: translate(14px, -54%); }
+
+.ask__send {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 58px; height: 58px;
+  margin-top: -29px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cream);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  scale: .9;
+  transition: scale .6s var(--ease-jelly), rotate .6s var(--ease-jelly);
+  -webkit-tap-highlight-color: transparent;
+}
+.ask__send svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ask__send span { position: relative; font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em; translate: 1px 1px; }
+.ask__form.has-text .ask__send { scale: 1; }
+.ask__send:hover { scale: 1.1; rotate: -6deg; }
+.ask__send:active { scale: .86; }
+.ask__send:focus-visible { outline: 2px solid var(--cream); outline-offset: 4px; border-radius: 50%; }
+
+/* little question bubbles */
+.ask__seeds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 16px;
+  margin-top: 30px;
+  max-width: 700px;
+}
+.ask__seed {
+  position: relative;
+  padding: 10px 17px 11px;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.1;
+  font-variation-settings: "wght" 420, "SOFT" 100, "WONK" 1;
+  cursor: pointer;
+  opacity: .9;
+  rotate: var(--tilt);
+  animation: ask-bob var(--bob, 4.4s) var(--ease-in-out) infinite;
+  animation-delay: var(--d, 0s);
+  transition: opacity .5s var(--ease-out), scale .6s var(--ease-jelly), color .3s var(--ease-out), filter .5s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ask__seed-rim {
+  position: absolute;
+  left: -7px; top: -7px;
+  width: calc(100% + 14px);
+  height: calc(100% + 14px);
+  overflow: visible;
+  pointer-events: none;
+}
+.ask__seed-t { position: relative; }
+.ask__seed:hover, .ask__seed:focus-visible { color: var(--ink); opacity: 1; scale: 1.06; outline: none; }
+.ask__seed:hover .ask-sglass, .ask__seed:focus-visible .ask-sglass { opacity: 1; }
+.ask__seed.is-popped { scale: 1.3; opacity: 0; pointer-events: none; transition: scale .5s var(--ease-out), opacity .35s var(--ease-out); }
+.ask__seed.is-new { opacity: 0; scale: .6; translate: 0 18px; }
+.ask__seed.is-new, .ask__seed:not(.is-new) { transition: opacity .7s var(--ease-out), scale .8s var(--ease-jelly), translate .9s var(--ease-jelly), color .3s var(--ease-out); }
+@keyframes ask-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -5px; }
+}
+
+/* the question on its way into the jelly */
+.ask__fly {
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 3;
+  padding: 9px 16px 10px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.1;
+  white-space: nowrap;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+.ask__fly-rim {
+  position: absolute;
+  left: -10px; top: -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  overflow: visible;
+}
+.ask__fly-t { position: relative; }
+.ask__fx {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 4;
+}
+
+@media (max-width: 720px) {
+  .ask { --ask-jw: 66px; --ask-pl: 22px; }
+  .ask__stage { column-gap: 12px; }
+  .ask__said { font-size: 21px; line-height: 1.24; margin-bottom: 26px; }
+  .ask__bubble { height: 64px; }
+  .ask__input { padding-right: 66px; }
+  .ask__input, .ask__ph { font-size: 17px; }
+  .ask__send { width: 48px; height: 48px; margin-top: -24px; right: 8px; }
+  .ask__send span { font-size: 11px; }
+  .ask__seeds { gap: 12px 12px; margin-top: 24px; margin-left: calc(-1 * (var(--ask-jw) + 12px)); }
+  .ask__seed { font-size: 15px; padding: 9px 14px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask__ph span, .ask__seed, .ask__dot { animation: none; }
+  .ask__line.is-sinking { transition: opacity .2s linear; transform: none; filter: none; }
+}
+
+/* keep clear of the depth gauge that rides the right edge on phones */
+@media (max-width: 720px) {
+  .ask { padding-right: 14px; }
+}

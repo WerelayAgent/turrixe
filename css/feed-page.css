@@ -1,0 +1,194 @@
+/* feed-page: live.html (live.turri.xyz), the whole live feed beside a small Turri. */
+.fp {
+  position: relative;
+  z-index: var(--z-main);
+  display: grid;
+  grid-template-columns: minmax(250px, 330px) minmax(0, 1fr);
+  gap: clamp(28px, 4.4vw, 72px);
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 96px var(--gutter) 90px;
+}
+.topbar__live.is-here { opacity: 1; font-variation-settings: "wght" 640, "opsz" 16, "SOFT" 100, "WONK" 1; }
+
+/* ---------- beside the feed ---------- */
+.fp__side {
+  position: sticky;
+  top: 84px;
+  align-self: start;
+  display: grid;
+  gap: 22px;
+}
+.fp__jelly { position: relative; width: 100%; aspect-ratio: 1 / 1.05; margin: -18px 0 -30px; }
+.fp__countdown { margin: 0; }
+.fp__k {
+  margin: 0;
+  font: 11.5px/1.3 var(--mono);
+  opacity: .66;
+}
+.fp__vault {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 18px;
+}
+.fp__stat { min-width: 0; }
+.fp__v {
+  margin: 3px 0 0;
+  font: 400 21px/1.1 var(--serif);
+  font-variation-settings: "wght" 560, "opsz" 36, "SOFT" 100, "WONK" 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.fp__chips { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 7px; }
+.fp__chip {
+  position: relative;
+  isolation: isolate;
+  padding: 4px 10px 5px;
+  font: 12px/1.2 var(--mono);
+  color: var(--cream);
+}
+.fp__chip::before {               /* a quick ink swash under each name */
+  content: "";
+  position: absolute;
+  inset: 0 -2px;
+  z-index: -1;
+  background: var(--ink);
+  border-radius: 46% 54% 50% 48% / 60% 46% 58% 44%;
+  transform: rotate(-1.6deg);
+}
+.fp__chip:nth-child(2n)::before { border-radius: 54% 46% 44% 56% / 48% 60% 42% 56%; transform: rotate(1.4deg); }
+
+/* ---------- the feed ---------- */
+.fp__head h1 {
+  margin: 0;
+  font: 400 clamp(44px, 6vw, 86px)/.98 var(--serif);
+  font-variation-settings: "wght" 760, "opsz" 144, "SOFT" 100, "WONK" 1;
+  letter-spacing: -0.03em;
+}
+.fp__lede {
+  margin: 16px 0 0;
+  max-width: 33em;
+  font: 400 clamp(17px, 1.3vw, 20px)/1.45 var(--serif);
+  font-variation-settings: "wght" 400, "opsz" 20, "SOFT" 100, "WONK" 0;
+  opacity: .88;
+}
+.fp__preview {
+  display: inline-block;
+  margin: 16px 0 0;
+  padding: 7px 12px 8px;
+  max-width: 38em;
+  font: 12.5px/1.4 var(--mono);
+  color: var(--cream);
+  background: var(--ink);
+  border-radius: 14px 18px 15px 20px / 18px 14px 20px 15px;
+  transform: rotate(-.4deg);
+}
+.fp__preview[hidden] { display: none; }
+.fp__filters { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 26px 0 8px -10px; }
+.fp__f {
+  padding: 4px 10px 5px;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: 14px/1.2 var(--mono);
+  opacity: .6;
+  border-radius: 46% 54% 50% 48% / 60% 46% 58% 44%;
+  transition: opacity .3s var(--ease-out), color .3s var(--ease-out), background-color .3s var(--ease-out);
+}
+.fp__f:hover { opacity: 1; }
+.fp__f.is-on { opacity: 1; color: var(--cream); background: var(--ink); }
+
+.fp__list { list-style: none; margin: 18px 0 0; padding: 0; }
+.fp__list[data-f="thought"] > .fp-i:not([data-kind="thought"]),
+.fp__list[data-f="act"] > .fp-i:not([data-kind="act"]),
+.fp__list[data-f="brain"] > .fp-i:not([data-kind="brain"]),
+.fp__list:not([data-f="all"]) > .fp-div { display: none; }
+
+.fp-i {
+  display: grid;
+  grid-template-columns: 74px 92px minmax(0, 1fr);
+  column-gap: 14px;
+  padding: 13px 0;
+  align-items: baseline;
+  transition: opacity .8s var(--ease-out), transform 1s var(--ease-jelly), filter .9s var(--ease-out);
+}
+.fp-i.is-new { opacity: 0; transform: translateY(-10px); filter: blur(4px); }
+/* before launch: nothing has happened yet */
+.fp-empty {
+  padding: 18px 0;
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.35;
+  opacity: .72;
+}
+.fp__chip.is-planned { opacity: .62; }
+.fp-i + .fp-i { border-top: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
+.fp-i__time { font: 12px/1.4 var(--mono); opacity: .55; font-variant-numeric: tabular-nums; }
+.fp-i__tag { font: 600 12px/1.4 var(--mono); opacity: .82; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fp-i__text {
+  margin: 0;
+  font: 400 18px/1.38 var(--serif);
+  font-variation-settings: "wght" 420, "opsz" 18, "SOFT" 100, "WONK" 0;
+}
+.fp-i__meta {
+  grid-column: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 4px;
+  font: 11.5px/1.3 var(--mono);
+  opacity: .55;
+}
+.fp-i__meta:empty { display: none; }
+.fp-i__tx { color: inherit; text-decoration: none; }
+.fp-i__tx::after { content: " \2197"; }
+.fp-i__tx:hover { opacity: 1; }
+
+/* on-chain moves and new brains stand out from the thinking */
+.fp-i--act .fp-i__tag, .fp-i--brain .fp-i__tag {
+  justify-self: start;
+  padding: 1px 8px 2px;
+  color: var(--cream);
+  background: var(--ink);
+  border-radius: 40% 60% 48% 52% / 58% 44% 56% 42%;
+  opacity: 1;
+}
+.fp-i--brain .fp-i__text {
+  font-size: 23px;
+  line-height: 1.22;
+  font-variation-settings: "wght" 640, "opsz" 36, "SOFT" 100, "WONK" 1;
+}
+.fp-i--thought .fp-i__text { opacity: .92; }
+
+.fp-div { position: relative; padding: 22px 0 10px; }
+.fp-div__ink { display: block; width: 100%; height: 10px; overflow: visible; fill: var(--ink); }
+.fp-div__t { display: block; margin-top: 7px; font: 12px/1.3 var(--mono); opacity: .7; }
+
+@media (max-width: 900px) {
+  /* on phones: what this is first, then me with the countdown and the numbers, then the feed */
+  .fp { grid-template-columns: 1fr; padding-top: 84px; gap: 26px; }
+  .fp__main { display: contents; }
+  .fp__head { order: 1; }
+  .fp__side { order: 2; position: relative; top: 0; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); align-items: center; gap: 18px; }
+  .fp__filters { order: 3; margin: 0; }
+  .fp__list { order: 4; margin: 0; }
+  .fp__jelly { margin: 0; }
+  .fp__countdown { min-width: 0; }
+  /* no room for Turri's line beside the ring here: the ring speaks alone (the line stays for screen readers) */
+  .fp .cd__say { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .fp__vault, .fp__hooks { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  .fp-i { grid-template-columns: 62px minmax(0, 1fr); }
+  .fp-i__tag { grid-column: 2; }
+  .fp-i__text, .fp-i__meta { grid-column: 1 / -1; }
+  .fp-i__text { margin-top: 3px; font-size: 17px; }
+  .fp-i--brain .fp-i__text { font-size: 20px; }
+  .fp__vault { grid-template-columns: 1fr 1fr; }
+  .fp__v { white-space: normal; font-size: 19px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fp-i { transition: none; }
+}
