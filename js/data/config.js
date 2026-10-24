@@ -2,11 +2,11 @@
 export const config = {
   name: "Turrixe",
   ticker: "TRXE",
-  ca: "",                       // empty until the coin exists; modules show "CA drops at launch"
+  ca: "BGKnT8tbEqvT61aTTkDqD45LSycvcf5Xnw1KAozXpump",
   // The SHA-256 (hex) of the coin address, set before launch so the live feed can reveal the address at launch without
   // the address itself sitting in this public file. The page shows a feed's address only if it is `ca` or hashes to this.
   // node -e "console.log(require('crypto').createHash('sha256').update(process.argv[1]).digest('hex'))" <address>
-  caHash: "",
+  caHash: "eacc0c2bdc469ff0b5e8a62562f565ee87e92d149f8c94fda97e175b42d2136a",
   // the coin's pages follow its address: once `ca` is known (here, or revealed by the feed at launch) Buy and Chart
   // point at the coin itself
   links: {

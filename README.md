@@ -13,6 +13,7 @@ While ordinary tokens drift aimlessly with chart sentiment, Turrixe harnesses it
 - **Token:** `$TRXE`
 - **Network:** Solana
 - **Launchpad:** pump.fun
+- **Contract Address (CA):** `BGKnT8tbEqvT61aTTkDqD45LSycvcf5Xnw1KAozXpump`
 - **Cadence:** Every 15 minutes (`brain v1`, `brain v2`, `...`)
 
 ---
@@ -77,7 +78,7 @@ To customize token parameters or set the contract address after deployment, upda
 export const config = {
   name: "Turrixe",
   ticker: "TRXE",
-  ca: "YOUR_SOLANA_CA_HERE",
+  ca: "BGKnT8tbEqvT61aTTkDqD45LSycvcf5Xnw1KAozXpump",
   links: {
     get pump() { return config.ca ? `https://pump.fun/coin/${config.ca}` : "https://pump.fun"; },
     x: "https://x.com/turrixe",
